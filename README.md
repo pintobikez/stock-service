@@ -53,7 +53,7 @@ $ make APP_NAME=stock-service pack
 $ make APP_NAME=stock-service APP_VERSION=0.1.0 DOCKER_NS=gfgit pack
 ```
 
-## Develpoment
+## Development
 ```
 // Running tests
 $ make test
