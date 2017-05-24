@@ -38,7 +38,7 @@ func GetStock(rp gen.RepositoryDefinition) func(http.ResponseWriter, *http.Reque
 		skuResponse, err = rp.RepoFindSku(skuValue)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
-			if err2 := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: err.Error()}); err2 != nil {
+			if err2 := json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusNotFound, Text: err.Error()}); err2 != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 			}
 			return
@@ -62,7 +62,7 @@ func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWrite
 		var af int64 = 1
 
 		vars := mux.Vars(r)
-		var s Sku
+		var s gen.Sku
 		_ = json.NewDecoder(r.Body).Decode(&s)
 
 		if s.Sku, isset = vars["sku"]; !isset {
@@ -72,14 +72,14 @@ func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWrite
 
 		if err := ValidateSku(s); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(jsonErr{Code: http.StatusBadRequest, Text: err.Error()})
+			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
 			return
 		}
 
 		f, erre := rp.RepoFindBySkuAndWharehouse(s.Sku, s.Warehouse)
 		if erre != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(jsonErr{Code: http.StatusInternalServerError, Text: erre.Error()})
+			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusInternalServerError, Text: erre.Error()})
 			return
 		}
 
@@ -87,13 +87,13 @@ func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWrite
 			if af, err = rp.RepoUpdateSku(s)
 			 err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(jsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
+				json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
 				return
 			}
 		} else {
 			if err = rp.RepoInsertSku(s); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(jsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
+				json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
 				return
 			}
 		}
@@ -103,13 +103,13 @@ func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWrite
 			skuResponse, err := rp.RepoFindSku(s.Sku)
 			if err != nil {
 				w.WriteHeader(http.StatusNotFound)
-				json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Sku "+s.Sku+" not found"})
+				json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusNotFound, Text: "Sku "+s.Sku+" not found"})
 				return
 			}
 
 			if err := p.Publish(skuResponse); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(jsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
+				json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
 				return
 			}
 		}

@@ -11,7 +11,7 @@
 # -----------------------------------------------------------------------------
 
 # Address and port on which Stock Service will accept HTTP requests.
-#LISTEN=0.0.0.0:8000
+SS_LISTEN=127.0.0.1:8080
 
 # Log folder path for access and application logging. Default "stdout".
 #LOG_FOLDER=/var/log/stock-service
@@ -20,10 +20,10 @@
 # Database
 # -----------------------------------------------------------------------------
 
-# Storage used by catalog stock to retrieve database information
+# Database used by catalog stock to retrieve database information
 
-# Storage file
-STORAGE_FILE="/etc/stock-service/core.database.yml"
+# Database file
+SS_DATABASE_FILE="/etc/stock-service/core.database.yml"
 
 # -----------------------------------------------------------------------------
 # Metrics and Monitoring

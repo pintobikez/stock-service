@@ -1,4 +1,4 @@
-package main
+package api 
 
 import (
 	"net/http"
@@ -9,18 +9,18 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/gorilla/mux"
-	"bitbucket.org/ricardomvpinto/stock-service/utils"
+	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
 /* ValidateReservation DataProvider */
 type testReserv struct {
-	value  Reservation
+	value  gen.Reservation
   	result error
 }
 var testValidReservation = []testReserv {
-	{Reservation{"","AB"}, fmt.Errorf("Sku is empty")},
-	{Reservation{"AA",""}, fmt.Errorf("Warehouse is empty")},
-	{Reservation{"AA","AB"}, nil},
+	{gen.Reservation{"","AB"}, fmt.Errorf("Sku is empty")},
+	{gen.Reservation{"AA",""}, fmt.Errorf("Warehouse is empty")},
+	{gen.Reservation{"AA","AB"}, nil},
 }
 
 /* Test for ValidateSku method */
@@ -33,13 +33,13 @@ func TestValidateReservation(t *testing.T) {
 
 // Mock Server
 func setupServerRes() (*mux.Router, *httptest.ResponseRecorder) {
-	var routes = Routes{
-		Route{
+	var routes = gen.Routes{
+		gen.Route{
 			"PutReservation",
 			"PUT",
 			"/reservation/{sku}",
 			PutReservation(new(RepositoryMock), new(PublisherMock)),
-		},Route{
+		},gen.Route{
 			"RemoveReservation",
 			"DELETE",
 			"/reservation/{sku}",

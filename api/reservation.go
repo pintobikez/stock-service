@@ -74,7 +74,7 @@ func PutReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.Respons
 		code, err := ProcessRequest(w, res, true, rp, p)
 		w.WriteHeader(code)
 		if err != nil {
-			json.NewEncoder(w).Encode(jsonErr{Code: code, Text: err.Error()})
+			json.NewEncoder(w).Encode(gen.JsonErr{Code: code, Text: err.Error()})
 		}
 
 		return
@@ -95,7 +95,7 @@ func RemoveReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.Resp
 
 		if code, err := ProcessRequest(w, res, false, rp, p); err != nil {
 			w.WriteHeader(code)
-			json.NewEncoder(w).Encode(jsonErr{Code: code, Text: err.Error()})
+			json.NewEncoder(w).Encode(gen.JsonErr{Code: code, Text: err.Error()})
 		} else {
 			w.WriteHeader(code)
 		}

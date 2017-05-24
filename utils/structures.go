@@ -7,8 +7,8 @@ type PubSub interface {
 }
 
 type RepositoryDefinition interface {
-	connectDB(stringConn string)
-	disconnectDB()
+	ConnectDB(stringConn string)
+	DisconnectDB()
 	RepoFindBySkuAndWharehouse(sku string, warehouse string) (*Sku, error)
 	RepoFindSku(sku string) (*SkuResponse, error)
 	RepoUpdateSku(s Sku) (int64, error)
@@ -17,6 +17,8 @@ type RepositoryDefinition interface {
 	RepoDeleteReservation(re Reservation) error
 }
 
+type Routes []Route
+
 type Route struct {
 	Name        string
 	Method      string
@@ -24,9 +26,7 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
-type Routes []Route
-
-type jsonErr struct {
+type JsonErr struct {
 	Code int    `json:"code"`
 	Text string `json:"text"`
 }

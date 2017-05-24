@@ -3,7 +3,7 @@ package publisher
 import (
 	"encoding/json"
 	"os"
-	gen "bitbucket.org/ricardomvpinto/stock-service/general"
+	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
 type FilePublisher struct {

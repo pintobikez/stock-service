@@ -1,9 +1,10 @@
-package main
+package repository 
 
 import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
 type Repository struct {
@@ -11,7 +12,7 @@ type Repository struct {
 	db *sql.DB
 }
 
-func (r *Repository) connectDB(stringConn string) {
+func (r *Repository) ConnectDB(stringConn string) {
 	var err error
 	r.db, err = sql.Open("mysql", stringConn)
 	if err != nil {
@@ -19,43 +20,43 @@ func (r *Repository) connectDB(stringConn string) {
 	}
 }
 
-func (r *Repository) disconnectDB() {
+func (r *Repository) DisconnectDB() {
 	r.db.Close()
 }
 
-func (r *Repository) RepoFindBySkuAndWharehouse(sku string, warehouse string) (*Sku, error) {
+func (r *Repository) RepoFindBySkuAndWharehouse(sku string, warehouse string) (*gen.Sku, error) {
 	var quantity int64
 	var found bool
 
 	err := r.db.QueryRow("SELECT IF(COUNT(*),'true','false') FROM stock WHERE sku=? AND warehouse=?", sku, warehouse).Scan(&found)
 	if err != nil {
-		return &Sku{}, fmt.Errorf(err.Error())
+		return &gen.Sku{}, fmt.Errorf(err.Error())
 	}
 
 	if !found {
-		return &Sku{}, nil
+		return &gen.Sku{}, nil
 	}
 
 	err = r.db.QueryRow("SELECT quantity FROM stock WHERE sku=? AND warehouse=?", sku, warehouse).Scan(&quantity)
 		if err != nil {
-		return &Sku{}, fmt.Errorf(err.Error())
+		return &gen.Sku{}, fmt.Errorf(err.Error())
 	}
 
-	return &Sku{Sku: sku, Warehouse: warehouse, Quantity: quantity}, nil
+	return &gen.Sku{Sku: sku, Warehouse: warehouse, Quantity: quantity}, nil
 }
 
-func (r *Repository) RepoFindSku(sku string) (*SkuResponse, error) {
+func (r *Repository) RepoFindSku(sku string) (*gen.SkuResponse, error) {
 
-	var resp *SkuResponse = new(SkuResponse)
+	var resp *gen.SkuResponse = new(gen.SkuResponse)
 
 	rows, err := r.db.Query("SELECT sku, warehouse, quantity, reserved, (quantity-reserved) as avail FROM (select s.sku, s.quantity, s.warehouse, (select count(*) from reservation where sku=s.sku and warehouse=s.warehouse) as reserved from stock s where s.sku=?) as t", sku)
 
 	if err != nil {
-		return resp, fmt.Errorf(err.Error())
+		return resp, err
 	}
 
 	// arr := make([]SkuValues, 0)
-	var arr []SkuValues
+	var arr []gen.SkuValues
 
 	for rows.Next() {
 		var sku string
@@ -69,7 +70,7 @@ func (r *Repository) RepoFindSku(sku string) (*SkuResponse, error) {
 			return resp, fmt.Errorf("Error reading rows: %s", err.Error())
 		}
 
-		aux := SkuValues{Quantity: quantity, Warehouse: warehouse}
+		aux := gen.SkuValues{Quantity: quantity, Warehouse: warehouse}
 		arr = append(arr, aux)
 
 		resp.Sku = sku
@@ -78,10 +79,16 @@ func (r *Repository) RepoFindSku(sku string) (*SkuResponse, error) {
 		resp.Values = arr
 	}
 
+	rows.Close()
+
+	if resp.Sku == "" {
+		return resp, fmt.Errorf("%s not found",sku)
+	}
+
 	return resp, nil
 }
 
-func (r *Repository) RepoUpdateSku(s Sku) (int64, error) {
+func (r *Repository) RepoUpdateSku(s gen.Sku) (int64, error) {
 
 	stmt, err := r.db.Prepare("UPDATE stock SET quantity=? WHERE sku=? AND warehouse=?")
 
@@ -109,7 +116,7 @@ func (r *Repository) RepoUpdateSku(s Sku) (int64, error) {
 	return affect, nil
 }
 
-func (r *Repository) RepoInsertSku(s Sku) error {
+func (r *Repository) RepoInsertSku(s gen.Sku) error {
 
 	stmt, err := r.db.Prepare("INSERT INTO stock VALUES (?,?,?,now())")
 
@@ -129,7 +136,7 @@ func (r *Repository) RepoInsertSku(s Sku) error {
 	return nil
 }
 
-func (r *Repository) RepoInsertReservation(re Reservation) error {
+func (r *Repository) RepoInsertReservation(re gen.Reservation) error {
 
 	stmt, err := r.db.Prepare("INSERT INTO reservation VALUES (?,?,now())")
 
@@ -149,7 +156,7 @@ func (r *Repository) RepoInsertReservation(re Reservation) error {
 	return nil
 }
 
-func (r *Repository) RepoDeleteReservation(re Reservation) error {
+func (r *Repository) RepoDeleteReservation(re gen.Reservation) error {
 
 	stmt, err := r.db.Prepare("DELETE FROM reservation WHERE sku=? AND warehouse=? ORDER BY created_at ASC LIMIT 1")
 

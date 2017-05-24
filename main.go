@@ -4,26 +4,29 @@ import (
 	"os"
 	"log"
 	"strconv"
-	"io/ioutil"
 	"net/http"
-	"gopkg.in/yaml.v2"
-        gen "bitbucket.org/ricardomvpinto/stock-service/utils"
-        rou "bitbucket.org/ricardomvpinto/stock-service/router"
-	api "bitbucket.org/ricardomvpinto/stock-service/api"	
+    gen "bitbucket.org/ricardomvpinto/stock-service/utils"
+    rou "bitbucket.org/ricardomvpinto/stock-service/router"
+	api "bitbucket.org/ricardomvpinto/stock-service/api"
 	pub "bitbucket.org/ricardomvpinto/stock-service/publisher"
 	rep "bitbucket.org/ricardomvpinto/stock-service/repository"
+)
+
+const (
+	SS_DATABASE_FILE = "SS_DATABASE_FILE"
+	SS_LISTEN = "SS_LISTEN"
 )
 
 var repo *rep.Repository = new(rep.Repository)
 var pubsub *pub.FilePublisher = new(pub.FilePublisher)
 
 func buildStringConnection(filename string) string {
-	t, err := gen.loadConfigFile(filename)
-	if err != nill {
+	t, err := gen.LoadConfigFile(filename)
+	if err != nil {
 		panic(err)
 	}
 	// [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
-	stringConn = t.Driver.User + ":" + t.Driver.Pw
+	stringConn := t.Driver.User + ":" + t.Driver.Pw
 	stringConn += "@tcp(" + t.Driver.Host + ":" + strconv.Itoa(t.Driver.Port) +")"
 	stringConn += "/" + t.Driver.Schema + "?charset=utf8"
 
@@ -31,7 +34,7 @@ func buildStringConnection(filename string) string {
 }
 
 func main() {
-	stringConn := buildStringConnection(os.Getenv(STORAGE_FILE))
+	stringConn := buildStringConnection(os.Getenv(SS_DATABASE_FILE))
 
 	var routes = gen.Routes{
 		gen.Route{
@@ -60,9 +63,9 @@ func main() {
 		},
 	}
 
-	repo.connectDB(stringConn)
+	repo.ConnectDB(stringConn)
 	router := rou.NewRouter(routes)
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(os.Getenv(SS_LISTEN), router))
 
-	defer repo.disconnectDB()
+	defer repo.DisconnectDB()
 }

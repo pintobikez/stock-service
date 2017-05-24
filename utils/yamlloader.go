@@ -2,6 +2,9 @@ package utils
 
 import (
 	errors "github.com/pkg/errors"
+	"io/ioutil"
+	"path/filepath"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -20,7 +23,7 @@ type YmlConfig struct {
     }
 }
 
-func loadConfigFile(string filename) *YmlConfig, error {
+func LoadConfigFile(filename string) (*YmlConfig, error) {
 	filename, err := filepath.Abs(filename)
 
 	if err != nil {

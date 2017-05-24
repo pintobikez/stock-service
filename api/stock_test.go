@@ -1,4 +1,4 @@
-package main
+package api 
 
 import (
 	"net/http"
@@ -18,10 +18,10 @@ type testSku struct {
   	result error
 }
 var testValidSku = []testSku {
-	{Sku{"",10,"AB"}, fmt.Errorf("Sku is empty")},
-	{Sku{"AA",10,""}, fmt.Errorf("Warehouse is empty")},
-	{Sku{"AA",-1,"AB"}, fmt.Errorf("Quantity is negative")},
-	{Sku{"AA",10,"AB"}, nil},
+	{gen.Sku{"",10,"AB"}, fmt.Errorf("Sku is empty")},
+	{gen.Sku{"AA",10,""}, fmt.Errorf("Warehouse is empty")},
+	{gen.Sku{"AA",-1,"AB"}, fmt.Errorf("Quantity is negative")},
+	{gen.Sku{"AA",10,"AB"}, nil},
 }
 
 /* Test for ValidateSku method */
@@ -34,13 +34,13 @@ func TestValidateSku(t *testing.T) {
 
 //Mock Server
 func setupServerStock() (*mux.Router, *httptest.ResponseRecorder) {
-	var routes = Routes{
-		Route{
+	var routes = gen.Routes{
+		gen.Route{
 			"PutStock",
 			"PUT",
 			"/stock/{sku}",
 			PutStock(new(RepositoryMock), new(PublisherMock)),
-		},Route{
+		},gen.Route{
 			"GetStock",
 			"GET",
 			"/stock/{sku}",
