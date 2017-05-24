@@ -1,11 +1,12 @@
-package main
+package router
 
 import (
 	"github.com/gorilla/mux"
 	"net/http"
+	gen "bitbucket.org/ricardomvpinto/stock-service/general"
 )
 
-func NewRouter(routes Routes) *mux.Router {
+func NewRouter(routes gen.Routes) *mux.Router {
 
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {

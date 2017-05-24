@@ -1,13 +1,14 @@
-package main
+package api
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
+	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
-func ValidateSku(s Sku) error {
+func ValidateSku(s gen.Sku) error {
 	if s.Sku == "" {
 		return fmt.Errorf("Sku is empty")
 	}
@@ -20,12 +21,12 @@ func ValidateSku(s Sku) error {
 	return nil
 }
 
-func GetStock(rp RepositoryDefinition) func(http.ResponseWriter, *http.Request) {
+func GetStock(rp gen.RepositoryDefinition) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 		vars := mux.Vars(r)
-		var skuResponse *SkuResponse
+		var skuResponse *gen.SkuResponse
 		var err error
 
 		skuValue, isset := vars["sku"]
@@ -52,7 +53,7 @@ func GetStock(rp RepositoryDefinition) func(http.ResponseWriter, *http.Request) 
 	}
 }
 
-func PutStock(rp RepositoryDefinition, p PubSub) func(http.ResponseWriter, *http.Request) {
+func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 

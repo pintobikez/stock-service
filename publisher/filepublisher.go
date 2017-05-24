@@ -1,14 +1,15 @@
-package main
+package publisher 
 
 import (
 	"encoding/json"
 	"os"
+	gen "bitbucket.org/ricardomvpinto/stock-service/general"
 )
 
 type FilePublisher struct {
 }
 
-func (p *FilePublisher) Publish(s *SkuResponse) error {
+func (p *FilePublisher) Publish(s *gen.SkuResponse) error {
 	jsonOutpout, _ := json.Marshal(s)
 
 	f, err := os.OpenFile("queue.json", os.O_APPEND|os.O_WRONLY, 0600)

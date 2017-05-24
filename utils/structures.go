@@ -1,4 +1,4 @@
-package main
+package utils
 
 import "net/http"
 
@@ -25,16 +25,6 @@ type Route struct {
 }
 
 type Routes []Route
-
-type Yconfig struct {
-    Mysql struct {
-        Host string
-	    User string
-	    Pw string
-	    Port int
-	    Schema string
-    }
-}
 
 type jsonErr struct {
 	Code int    `json:"code"`

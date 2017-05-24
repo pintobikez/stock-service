@@ -1,13 +1,14 @@
-package main
+package api 
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
+	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
-func ValidateReservation(res Reservation) error {
+func ValidateReservation(res gen.Reservation) error {
 	if res.Sku == "" {
 		return fmt.Errorf("Sku is empty")
 	}
@@ -17,8 +18,8 @@ func ValidateReservation(res Reservation) error {
 	return nil
 }
 
-func ProcessRequest(w http.ResponseWriter, r Reservation, put bool, rp RepositoryDefinition,p PubSub) (int, error) {
-	var skuFound *Sku
+func ProcessRequest(w http.ResponseWriter, r gen.Reservation, put bool, rp gen.RepositoryDefinition,p gen.PubSub) (int, error) {
+	var skuFound *gen.Sku
 
 	if err := ValidateReservation(r); err != nil {
 		return http.StatusBadRequest, err
@@ -58,10 +59,10 @@ func ProcessRequest(w http.ResponseWriter, r Reservation, put bool, rp Repositor
 	return http.StatusOK, nil
 }
 
-func PutReservation(rp RepositoryDefinition, p PubSub) func(http.ResponseWriter, *http.Request) {
+func PutReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		var res Reservation
+		var res gen.Reservation
 		var isset bool
 		_ = json.NewDecoder(r.Body).Decode(&res)
 
@@ -80,10 +81,10 @@ func PutReservation(rp RepositoryDefinition, p PubSub) func(http.ResponseWriter,
 	}
 }
 
-func RemoveReservation(rp RepositoryDefinition, p PubSub) func(http.ResponseWriter, *http.Request) {
+func RemoveReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		var res Reservation
+		var res gen.Reservation
 		var isset bool
 		_ = json.NewDecoder(r.Body).Decode(&res)
 

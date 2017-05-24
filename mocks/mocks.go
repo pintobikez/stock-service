@@ -1,7 +1,8 @@
-package main
+package mocks 
 
 import (
 	"fmt"
+	_ "bitbucket.org/ricardomvpinto/stock-service/general"
 )
 
 /* GetStock DataProvider*/

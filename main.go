@@ -1,69 +1,67 @@
 package main
 
 import (
+	"os"
 	"log"
 	"strconv"
 	"io/ioutil"
 	"net/http"
 	"gopkg.in/yaml.v2"
+        gen "bitbucket.org/ricardomvpinto/stock-service/utils"
+        rou "bitbucket.org/ricardomvpinto/stock-service/router"
+	api "bitbucket.org/ricardomvpinto/stock-service/api"	
+	pub "bitbucket.org/ricardomvpinto/stock-service/publisher"
+	rep "bitbucket.org/ricardomvpinto/stock-service/repository"
 )
 
-var repo *Repository = new(Repository)
-var pubsub *FilePublisher = new(FilePublisher)
+var repo *rep.Repository = new(rep.Repository)
+var pubsub *pub.FilePublisher = new(pub.FilePublisher)
 
-func loadYaml() string {
-	var stringConn = ""
-	t := Yconfig{}
-    
-    data, err := ioutil.ReadFile("config/dev.yml")
-    if err != nil {
-        panic(err)
-    }
-    err = yaml.Unmarshal([]byte(data), &t)
-    if err != nil {
-        panic(err)
-    }
-
+func buildStringConnection(filename string) string {
+	t, err := gen.loadConfigFile(filename)
+	if err != nill {
+		panic(err)
+	}
 	// [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
-	stringConn = t.Mysql.User + ":" + t.Mysql.Pw
-	stringConn += "@tcp(" + t.Mysql.Host + ":" + strconv.Itoa(t.Mysql.Port) +")"
-	stringConn += "/" + t.Mysql.Schema + "?charset=utf8"
+	stringConn = t.Driver.User + ":" + t.Driver.Pw
+	stringConn += "@tcp(" + t.Driver.Host + ":" + strconv.Itoa(t.Driver.Port) +")"
+	stringConn += "/" + t.Driver.Schema + "?charset=utf8"
 
 	return stringConn
 }
 
 func main() {
-	stringConn := loadYaml()
+	stringConn := buildStringConnection(os.Getenv(STORAGE_FILE))
 
-	var routes = Routes{
-		Route{
+	var routes = gen.Routes{
+		gen.Route{
 			"PutStock",
 			"PUT",
 			"/stock/{sku}",
-			PutStock(repo,pubsub),
+			api.PutStock(repo,pubsub),
 		},
-		Route{
+		gen.Route{
 			"GetStock",
 			"GET",
 			"/stock/{sku}",
-			GetStock(repo),
+			api.GetStock(repo),
 		},
-		Route{
+		gen.Route{
 			"PutReservation",
 			"PUT",
 			"/reservation/{sku}",
-			PutReservation(repo,pubsub),
+			api.PutReservation(repo,pubsub),
 		},
-		Route{
+		gen.Route{
 			"RemoveReservation",
 			"DELETE",
 			"/reservation/{sku}",
-			RemoveReservation(repo,pubsub),
+			api.RemoveReservation(repo,pubsub),
 		},
 	}
 
 	repo.connectDB(stringConn)
-	router := NewRouter(routes)
+	router := rou.NewRouter(routes)
 	log.Fatal(http.ListenAndServe(":8080", router))
 
 	defer repo.disconnectDB()

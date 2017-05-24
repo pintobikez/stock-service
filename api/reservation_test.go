@@ -9,6 +9,7 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/gorilla/mux"
+	"bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
 /* ValidateReservation DataProvider */

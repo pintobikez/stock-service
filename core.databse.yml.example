@@ -1,0 +1,6 @@
+cores:
+    core_name:
+        driver: datajet
+        params:
+            region: {{ core_name_datajet_region }}
+            key: {{ core_name_datajet_key }}
