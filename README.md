@@ -9,13 +9,14 @@ App requires Golang 1.8 or later, Glide Package Manager and Docker (for building
 - Install [Golang](https://golang.org/doc/install)
 - Install [Glide](https://glide.sh)
 - Install [Docker](htts://docker.com)
-- Install [Mysql-server](sudo apt-get install mysql-server)
 
-## Prepare Database
-Use the file in dbutil/createtables.sql
 
 ## Build
 For building binaries please use make, look at the commands bellow:
+
+
+To build manually the app use:
+CGO_ENABLED=0 go build -o ./build/stock-service -ldflags "-s -w" -tags netgo -a -v
 
 ```
 // Build the binary in your environment
