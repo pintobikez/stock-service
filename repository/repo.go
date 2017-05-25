@@ -1,10 +1,10 @@
-package repository 
+package repository
 
 import (
+	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
 type Repository struct {
@@ -38,7 +38,7 @@ func (r *Repository) RepoFindBySkuAndWharehouse(sku string, warehouse string) (*
 	}
 
 	err = r.db.QueryRow("SELECT quantity FROM stock WHERE sku=? AND warehouse=?", sku, warehouse).Scan(&quantity)
-		if err != nil {
+	if err != nil {
 		return &gen.Sku{}, fmt.Errorf(err.Error())
 	}
 
@@ -82,7 +82,7 @@ func (r *Repository) RepoFindSku(sku string) (*gen.SkuResponse, error) {
 	rows.Close()
 
 	if resp.Sku == "" {
-		return resp, fmt.Errorf("%s not found",sku)
+		return resp, fmt.Errorf("%s not found", sku)
 	}
 
 	return resp, nil

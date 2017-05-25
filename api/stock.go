@@ -1,11 +1,11 @@
 package api
 
 import (
+	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
-	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
 func ValidateSku(s gen.Sku) error {
@@ -84,8 +84,7 @@ func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWrite
 		}
 
 		if f.Sku != "" {
-			if af, err = rp.RepoUpdateSku(s)
-			 err != nil {
+			if af, err = rp.RepoUpdateSku(s); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
 				return
@@ -103,7 +102,7 @@ func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWrite
 			skuResponse, err := rp.RepoFindSku(s.Sku)
 			if err != nil {
 				w.WriteHeader(http.StatusNotFound)
-				json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusNotFound, Text: "Sku "+s.Sku+" not found"})
+				json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusNotFound, Text: "Sku " + s.Sku + " not found"})
 				return
 			}
 

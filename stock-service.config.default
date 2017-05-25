@@ -1,0 +1,39 @@
+# ---------------------------------
+# Stock Service configuration file
+# ---------------------------------
+#
+# The commented-out settings shown in this file represent the default values.
+#
+# This file is read when catalog-search start
+#
+# -----------------------------------------------------------------------------
+# General
+# -----------------------------------------------------------------------------
+
+# Address and port on which Stock Service will accept HTTP requests.
+SS_LISTEN=127.0.0.1:8080
+
+# Log folder path for access and application logging. Default "stdout".
+#LOG_FOLDER=/var/log/stock-service
+
+# -----------------------------------------------------------------------------
+# Database
+# -----------------------------------------------------------------------------
+
+# Database used by catalog stock to retrieve database information
+
+# Database file
+SS_DATABASE_FILE="/etc/stock-service/core.database.yml"
+
+# -----------------------------------------------------------------------------
+# Metrics and Monitoring
+# -----------------------------------------------------------------------------
+
+# If you want enable the NewRelic for monitoring or metrics, please define the
+# required configurations bellow:
+
+# Set the application name, this configuration is required for NewRelic.
+#NEWRELIC_APPNAME=stock-service
+
+# Set the license key, this config is required for NewRelic.
+#NEWRELIC_LICENSE_KEY=YOUR-LICENSE-KEY

@@ -1,13 +1,14 @@
-package mocks 
+package mocks
 
 import (
-	"fmt"
 	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
+	"fmt"
 )
 
 /* GetStock DataProvider*/
 type RepositoryMock struct {
 }
+
 func (o *RepositoryMock) connectDB(st string) {
 	return
 }
@@ -15,11 +16,11 @@ func (o *RepositoryMock) disconnectDB() {
 	return
 }
 func (o *RepositoryMock) RepoFindBySkuAndWharehouse(sku string, warehouse string) (*gen.Sku, error) {
-	if sku == "SC" && (warehouse == "A" || warehouse == "C"  || warehouse == "D") {
-		return &gen.Sku {
-			Sku:"SC",
-			Quantity:1,
-			Warehouse: warehouse,}, nil
+	if sku == "SC" && (warehouse == "A" || warehouse == "C" || warehouse == "D") {
+		return &gen.Sku{
+			Sku:       "SC",
+			Quantity:  1,
+			Warehouse: warehouse}, nil
 	}
 
 	if sku == "SC" && (warehouse == "B" || warehouse == "D") {
@@ -31,18 +32,18 @@ func (o *RepositoryMock) RepoFindBySkuAndWharehouse(sku string, warehouse string
 func (o *RepositoryMock) RepoFindSku(sku string) (*gen.SkuResponse, error) {
 	if sku == "SC" {
 		return &gen.SkuResponse{
-			Sku:"SC",
-			Reserved:1,
-			Available:10,
+			Sku:       "SC",
+			Reserved:  1,
+			Available: 10,
 			Values: []SkuValues{
-				SkuValues{10,"B"},
-				},
+				SkuValues{10, "B"},
+			},
 		}, nil
 	}
 
 	return new(gen.SkuResponse), fmt.Errorf("not found")
 }
-func (o *RepositoryMock) RepoInsertReservation(re gen.Reservation) error{
+func (o *RepositoryMock) RepoInsertReservation(re gen.Reservation) error {
 	if re.Sku == "SC" && re.Warehouse == "A" {
 		return nil
 	}
@@ -76,10 +77,10 @@ func (o *RepositoryMock) RepoInsertSku(s gen.Sku) error {
 	return fmt.Errorf("not found")
 }
 
-
 //Publisher Mock
 type PublisherMock struct {
 }
+
 func (p *PublisherMock) Publish(r *gen.SkuResponse) error {
 	return nil
 }

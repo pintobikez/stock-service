@@ -1,9 +1,9 @@
-package publisher 
+package publisher
 
 import (
+	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 	"encoding/json"
 	"os"
-	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
 type FilePublisher struct {

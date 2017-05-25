@@ -2,9 +2,9 @@ package utils
 
 import (
 	errors "github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
-	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -14,33 +14,30 @@ var (
 )
 
 type YmlConfig struct {
-    Driver struct {
-        Host string
-	    User string
-	    Pw string
-	    Port int
-	    Schema string
-    }
+	Driver struct {
+		Host   string
+		User   string
+		Pw     string
+		Port   int
+		Schema string
+	}
 }
 
 func LoadConfigFile(filename string) (*YmlConfig, error) {
-	filename, err := filepath.Abs(filename)
 
+	filename, err := filepath.Abs(filename)
 	if err != nil {
 		return nil, errors.Wrap(err, ErrInvalidFile)
 	}
 
 	file, err := ioutil.ReadFile(filename)
-
 	if err != nil {
 		return nil, errors.Wrap(err, ErrUnableToReadFile)
 	}
 
 	conf := new(YmlConfig)
 
-	err = yaml.Unmarshal(file, conf)
-
-	if err != nil {
+	if err = yaml.Unmarshal(file, conf); err != nil {
 		return nil, errors.Wrap(err, ErrUnableToParseFile)
 	}
 

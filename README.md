@@ -1,5 +1,6 @@
 # Stock service
 Stock service is a small app to deal with stock and stock reservation
+The database used to store the data is a mysql one
 
 ## Requirements
 App requires Golang 1.8 or later, Glide Package Manager and Docker (for building)
@@ -8,6 +9,10 @@ App requires Golang 1.8 or later, Glide Package Manager and Docker (for building
 - Install [Golang](https://golang.org/doc/install)
 - Install [Glide](https://glide.sh)
 - Install [Docker](htts://docker.com)
+- Install [Mysql-server](sudo apt-get install mysql-server)
+
+## Prepare Database
+Use the file in dbutil/createtables.sql
 
 ## Build
 For building binaries please use make, look at the commands bellow:
@@ -65,8 +70,7 @@ $ make test-coverage
 $ make test-report
 ```
 
-
-##USAGE:
+## Usage:
 
 * PUT RESERVATION CALL
 curl -v -X PUT http://localhost:8080/reservation/ABCDE -H 'content-type: application/json' -d '{"warehouse":"B"}'

@@ -1,0 +1,6 @@
+driver:
+    host: "mysql"
+    user: root
+    pw: root
+    port: 3306
+    schema: stockservice

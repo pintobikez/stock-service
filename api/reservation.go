@@ -1,11 +1,11 @@
-package api 
+package api
 
 import (
+	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
-	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
 func ValidateReservation(res gen.Reservation) error {
@@ -18,7 +18,7 @@ func ValidateReservation(res gen.Reservation) error {
 	return nil
 }
 
-func ProcessRequest(w http.ResponseWriter, r gen.Reservation, put bool, rp gen.RepositoryDefinition,p gen.PubSub) (int, error) {
+func ProcessRequest(w http.ResponseWriter, r gen.Reservation, put bool, rp gen.RepositoryDefinition, p gen.PubSub) (int, error) {
 	var skuFound *gen.Sku
 
 	if err := ValidateReservation(r); err != nil {
