@@ -6,16 +6,7 @@ import (
 	"time"
 )
 
-type Yconfig struct {
-    Mysql struct {
-        Host string
-	    User string
-	    Pw string
-	    Port int
-	    Schema string
-    }
-}
-
+// Logs requessts information to the console
 func Logger(inner http.Handler, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()

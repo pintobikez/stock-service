@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// Validates the consistency of the Sku struct
 func ValidateSku(s gen.Sku) error {
 	if s.Sku == "" {
 		return fmt.Errorf("Sku is empty")
@@ -21,6 +22,7 @@ func ValidateSku(s gen.Sku) error {
 	return nil
 }
 
+// Handler to GET Stock request
 func GetStock(rp gen.RepositoryDefinition) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -53,6 +55,7 @@ func GetStock(rp gen.RepositoryDefinition) func(http.ResponseWriter, *http.Reque
 	}
 }
 
+// Handler to PUT Stock request
 func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")

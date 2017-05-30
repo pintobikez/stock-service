@@ -23,6 +23,7 @@ type YmlConfig struct {
 	}
 }
 
+// Loads the given Yaml file into a YmlConfig structure
 func LoadConfigFile(filename string) (*YmlConfig, error) {
 
 	filename, err := filepath.Abs(filename)

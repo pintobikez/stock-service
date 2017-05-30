@@ -12,6 +12,7 @@ type Repository struct {
 	db *sql.DB
 }
 
+// Connects to the mysql database
 func (r *Repository) ConnectDB(stringConn string) {
 	var err error
 	r.db, err = sql.Open("mysql", stringConn)
@@ -20,10 +21,12 @@ func (r *Repository) ConnectDB(stringConn string) {
 	}
 }
 
+// Disconnects from the mysql database
 func (r *Repository) DisconnectDB() {
 	r.db.Close()
 }
 
+// Find by the sku value and a warehouse and Retrives an Sku
 func (r *Repository) RepoFindBySkuAndWharehouse(sku string, warehouse string) (*gen.Sku, error) {
 	var quantity int64
 	var found bool
@@ -45,6 +48,7 @@ func (r *Repository) RepoFindBySkuAndWharehouse(sku string, warehouse string) (*
 	return &gen.Sku{Sku: sku, Warehouse: warehouse, Quantity: quantity}, nil
 }
 
+// Finds by the sku value and Retrives an SkuResponse
 func (r *Repository) RepoFindSku(sku string) (*gen.SkuResponse, error) {
 
 	var resp *gen.SkuResponse = new(gen.SkuResponse)
@@ -55,7 +59,6 @@ func (r *Repository) RepoFindSku(sku string) (*gen.SkuResponse, error) {
 		return resp, err
 	}
 
-	// arr := make([]SkuValues, 0)
 	var arr []gen.SkuValues
 
 	for rows.Next() {
@@ -88,6 +91,7 @@ func (r *Repository) RepoFindSku(sku string) (*gen.SkuResponse, error) {
 	return resp, nil
 }
 
+// Updates the given Sku
 func (r *Repository) RepoUpdateSku(s gen.Sku) (int64, error) {
 
 	stmt, err := r.db.Prepare("UPDATE stock SET quantity=? WHERE sku=? AND warehouse=?")
@@ -116,6 +120,7 @@ func (r *Repository) RepoUpdateSku(s gen.Sku) (int64, error) {
 	return affect, nil
 }
 
+// Inserts the given Sku
 func (r *Repository) RepoInsertSku(s gen.Sku) error {
 
 	stmt, err := r.db.Prepare("INSERT INTO stock VALUES (?,?,?,now())")
@@ -136,6 +141,7 @@ func (r *Repository) RepoInsertSku(s gen.Sku) error {
 	return nil
 }
 
+// Inserts an Sku Reservation
 func (r *Repository) RepoInsertReservation(re gen.Reservation) error {
 
 	stmt, err := r.db.Prepare("INSERT INTO reservation VALUES (?,?,now())")
@@ -156,6 +162,7 @@ func (r *Repository) RepoInsertReservation(re gen.Reservation) error {
 	return nil
 }
 
+// Deletes an Sku Reservation
 func (r *Repository) RepoDeleteReservation(re gen.Reservation) error {
 
 	stmt, err := r.db.Prepare("DELETE FROM reservation WHERE sku=? AND warehouse=? ORDER BY created_at ASC LIMIT 1")

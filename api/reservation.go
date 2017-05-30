@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// Validates the consistency of the Reservation struct
 func ValidateReservation(res gen.Reservation) error {
 	if res.Sku == "" {
 		return fmt.Errorf("Sku is empty")
@@ -18,6 +19,7 @@ func ValidateReservation(res gen.Reservation) error {
 	return nil
 }
 
+// Processes a Reservation request
 func ProcessRequest(w http.ResponseWriter, r gen.Reservation, put bool, rp gen.RepositoryDefinition, p gen.PubSub) (int, error) {
 	var skuFound *gen.Sku
 
@@ -59,6 +61,7 @@ func ProcessRequest(w http.ResponseWriter, r gen.Reservation, put bool, rp gen.R
 	return http.StatusOK, nil
 }
 
+// Handler to PUT Reservation request
 func PutReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -81,6 +84,7 @@ func PutReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.Respons
 	}
 }
 
+// Handler to DELETE Reservation request
 func RemoveReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
