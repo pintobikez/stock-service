@@ -1,6 +1,6 @@
 FROM alpine:3.5
 
-LABEL maintainer "fabio.ribeiro@dafiti.com.br"
+LABEL maintainer "ricardo.pinto@dafiti.com.br"
 
 ARG APP_NAME=stock-service
 

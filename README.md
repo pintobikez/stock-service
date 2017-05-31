@@ -31,7 +31,7 @@ $ make OS=darwin build
 $ make APP_VERSION=0.1.0 build
 
 // Build with custom app name.
-$ make APP_NAME=catalog-search build
+$ make APP_NAME=stock-service build
 
 // Passing all flags
 $ make OS=darwin APP_NAME=stock-service APP_VERSION=0.1.0 build

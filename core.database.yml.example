@@ -1,6 +1,6 @@
-cores:
-    core_name:
-        driver: datajet
-        params:
-            region: {{ core_name_datajet_region }}
-            key: {{ core_name_datajet_key }}
+driver:
+    host: {{ db_hostname }}
+    user: {{ db_username }}
+    pw: {{ db_user_password }}
+    port: {{ db_port }}
+    schema: {{ db_schema }}
