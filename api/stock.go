@@ -66,7 +66,11 @@ func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWrite
 
 		vars := mux.Vars(r)
 		var s gen.Sku
-		_ = json.NewDecoder(r.Body).Decode(&s)
+		if err := json.NewDecoder(r.Body).Decode(&s); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
+			return
+		}
 
 		if s.Sku, isset = vars["sku"]; !isset {
 			w.WriteHeader(http.StatusBadRequest)

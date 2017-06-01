@@ -67,10 +67,16 @@ func PutReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.Respons
 		vars := mux.Vars(r)
 		var res gen.Reservation
 		var isset bool
-		_ = json.NewDecoder(r.Body).Decode(&res)
+
+		if err := json.NewDecoder(r.Body).Decode(&res); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
+			return
+		}
 
 		if res.Sku, isset = vars["sku"]; !isset {
 			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: "Sku not set"})
 			return
 		}
 
@@ -90,10 +96,16 @@ func RemoveReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.Resp
 		vars := mux.Vars(r)
 		var res gen.Reservation
 		var isset bool
-		_ = json.NewDecoder(r.Body).Decode(&res)
+
+		if err := json.NewDecoder(r.Body).Decode(&res); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
+			return
+		}
 
 		if res.Sku, isset = vars["sku"]; !isset {
 			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: "Sku not set"})
 			return
 		}
 
