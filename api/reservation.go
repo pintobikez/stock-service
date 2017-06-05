@@ -86,6 +86,8 @@ func PutReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.Respons
 			json.NewEncoder(w).Encode(gen.JsonErr{Code: code, Text: err.Error()})
 		}
 
+		defer r.Body.Close()
+
 		return
 	}
 }
@@ -115,6 +117,8 @@ func RemoveReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.Resp
 		} else {
 			w.WriteHeader(code)
 		}
+
+		defer r.Body.Close()
 
 		return
 	}

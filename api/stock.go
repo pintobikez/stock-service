@@ -119,6 +119,9 @@ func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWrite
 				return
 			}
 		}
+
+		defer r.Body.Close()
+
 		return
 	}
 }
