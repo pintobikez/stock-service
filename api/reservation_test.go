@@ -1,33 +1,36 @@
-package api 
+package api
 
 import (
+	mock "bitbucket.org/ricardomvpinto/stock-service/mocks"
+	"bitbucket.org/ricardomvpinto/stock-service/router"
+	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
+	"bytes"
+	"fmt"
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+	"io"
 	"net/http"
 	"net/http/httptest"
-	"fmt"
-	"io"
-	"bytes"
 	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/gorilla/mux"
-	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
 /* ValidateReservation DataProvider */
 type testReserv struct {
 	value  gen.Reservation
-  	result error
+	result error
 }
-var testValidReservation = []testReserv {
-	{gen.Reservation{"","AB"}, fmt.Errorf("Sku is empty")},
-	{gen.Reservation{"AA",""}, fmt.Errorf("Warehouse is empty")},
-	{gen.Reservation{"AA","AB"}, nil},
+
+var testValidReservation = []testReserv{
+	{gen.Reservation{"", "AB"}, fmt.Errorf("Sku is empty")},
+	{gen.Reservation{"AA", ""}, fmt.Errorf("Warehouse is empty")},
+	{gen.Reservation{"AA", "AB"}, nil},
 }
 
 /* Test for ValidateSku method */
 func TestValidateReservation(t *testing.T) {
 	for _, pair := range testValidReservation {
 		v := ValidateReservation(pair.value)
-		assert.Equal(t, v, pair.result,"Error message doesn't match")
+		assert.Equal(t, v, pair.result, "Error message doesn't match")
 	}
 }
 
@@ -38,43 +41,44 @@ func setupServerRes() (*mux.Router, *httptest.ResponseRecorder) {
 			"PutReservation",
 			"PUT",
 			"/reservation/{sku}",
-			PutReservation(new(RepositoryMock), new(PublisherMock)),
-		},gen.Route{
+			PutReservation(new(mock.RepositoryMock), new(mock.PublisherMock)),
+		}, gen.Route{
 			"RemoveReservation",
 			"DELETE",
 			"/reservation/{sku}",
-			RemoveReservation(new(RepositoryMock), new(PublisherMock)),
+			RemoveReservation(new(mock.RepositoryMock), new(mock.PublisherMock)),
 		},
 	}
-    //mux router with added question routes
-    m := NewRouter(routes)
-    //The response recorder used to record HTTP responses
-    respRec := httptest.NewRecorder()
+	//mux router with added question routes
+	m := router.NewRouter(routes)
+	//The response recorder used to record HTTP responses
+	respRec := httptest.NewRecorder()
 
-    return m, respRec
+	return m, respRec
 }
 
-/* 
-Tests for PutReservation method 
+/*
+Tests for PutReservation method
 */
 type reservationProvider struct {
-    method string
-    value string
-    json string
-    result int
+	method string
+	value  string
+	json   string
+	result int
 }
-var testReservationProvider = []reservationProvider {
-	{"PUT", "/reservation/", "", http.StatusNotFound}, // url not found
-	{"PUT", "/reservation/SAC", `{}`, http.StatusBadRequest}, // invalid Reservation object
-	{"PUT", "/reservation/SAC", `{"warehouse":"A"}`, http.StatusInternalServerError}, // RepoFindBySkuAndWharehouse error
-	{"PUT", "/reservation/SC", `{"warehouse":"C"}`, http.StatusInternalServerError}, // RepoInsertReservation error
-	{"PUT", "/reservation/SC", `{"warehouse":"B"}`, http.StatusNotFound}, // Sku and Warehouse not found
-	{"PUT", "/reservation/SC", `{"warehouse":"A"}`, http.StatusOK}, // Insert OK
-	{"DELETE", "/reservation/", "", http.StatusNotFound}, // url not found
-	{"DELETE", "/reservation/SAC", `{}`, http.StatusBadRequest}, // invalid Reservation object
-	{"DELETE", "/reservation/SC", `{"warehouse":"C"}`, http.StatusNotFound}, // Insert OK
+
+var testReservationProvider = []reservationProvider{
+	{"PUT", "/reservation/", "", http.StatusNotFound},                                  // url not found
+	{"PUT", "/reservation/SAC", `{}`, http.StatusBadRequest},                           // invalid Reservation object
+	{"PUT", "/reservation/SAC", `{"warehouse":"A"}`, http.StatusInternalServerError},   // RepoFindBySkuAndWharehouse error
+	{"PUT", "/reservation/SC", `{"warehouse":"C"}`, http.StatusInternalServerError},    // RepoInsertReservation error
+	{"PUT", "/reservation/SC", `{"warehouse":"B"}`, http.StatusNotFound},               // Sku and Warehouse not found
+	{"PUT", "/reservation/SC", `{"warehouse":"A"}`, http.StatusOK},                     // Insert OK
+	{"DELETE", "/reservation/", "", http.StatusNotFound},                               // url not found
+	{"DELETE", "/reservation/SAC", `{}`, http.StatusBadRequest},                        // invalid Reservation object
+	{"DELETE", "/reservation/SC", `{"warehouse":"C"}`, http.StatusNotFound},            // Insert OK
 	{"DELETE", "/reservation/SC", `{"warehouse":"D"}`, http.StatusInternalServerError}, // Insert OK
-	{"DELETE", "/reservation/SC", `{"warehouse":"A"}`, http.StatusOK}, // Insert OK
+	{"DELETE", "/reservation/SC", `{"warehouse":"A"}`, http.StatusOK},                  // Insert OK
 }
 
 func TestPutDeleteReservation(t *testing.T) {
@@ -87,13 +91,13 @@ func TestPutDeleteReservation(t *testing.T) {
 			val = bytes.NewBuffer(jsonStr)
 		}
 
-	    req, err := http.NewRequest(pair.method, pair.value, val)
-	    req.Header.Set("Content-Type", "application/json")
-	    if err != nil {
-	        t.Fatal("TestPutReservation failed!")
-	    }
+		req, err := http.NewRequest(pair.method, pair.value, val)
+		req.Header.Set("Content-Type", "application/json")
+		if err != nil {
+			t.Fatal("TestPutReservation failed!")
+		}
 
-	    m.ServeHTTP(rr, req)
+		m.ServeHTTP(rr, req)
 		assert.Equal(t, rr.Code, pair.result, "Code doesn't match")
 	}
 }

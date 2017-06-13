@@ -1,34 +1,37 @@
-package api 
+package api
 
 import (
+	mock "bitbucket.org/ricardomvpinto/stock-service/mocks"
+	"bitbucket.org/ricardomvpinto/stock-service/router"
+	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
+	"bytes"
+	"fmt"
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+	"io"
 	"net/http"
 	"net/http/httptest"
-	"fmt"
-	"io"
-	"bytes"
 	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/gorilla/mux"
-	"bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
 /* ValidateSKu DataProvider */
 type testSku struct {
-	value  Sku
-  	result error
+	value  gen.Sku
+	result error
 }
-var testValidSku = []testSku {
-	{gen.Sku{"",10,"AB"}, fmt.Errorf("Sku is empty")},
-	{gen.Sku{"AA",10,""}, fmt.Errorf("Warehouse is empty")},
-	{gen.Sku{"AA",-1,"AB"}, fmt.Errorf("Quantity is negative")},
-	{gen.Sku{"AA",10,"AB"}, nil},
+
+var testValidSku = []testSku{
+	{gen.Sku{"", 10, "AB"}, fmt.Errorf("Sku is empty")},
+	{gen.Sku{"AA", 10, ""}, fmt.Errorf("Warehouse is empty")},
+	{gen.Sku{"AA", -1, "AB"}, fmt.Errorf("Quantity is negative")},
+	{gen.Sku{"AA", 10, "AB"}, nil},
 }
 
 /* Test for ValidateSku method */
 func TestValidateSku(t *testing.T) {
 	for _, pair := range testValidSku {
 		v := ValidateSku(pair.value)
-		assert.Equal(t, v, pair.result,"Error message doesn't match")
+		assert.Equal(t, v, pair.result, "Error message doesn't match")
 	}
 }
 
@@ -39,65 +42,68 @@ func setupServerStock() (*mux.Router, *httptest.ResponseRecorder) {
 			"PutStock",
 			"PUT",
 			"/stock/{sku}",
-			PutStock(new(RepositoryMock), new(PublisherMock)),
-		},gen.Route{
+			PutStock(new(mock.RepositoryMock), new(mock.PublisherMock)),
+		}, gen.Route{
 			"GetStock",
 			"GET",
 			"/stock/{sku}",
-			GetStock(new(RepositoryMock)),
+			GetStock(new(mock.RepositoryMock)),
 		},
 	}
-    //mux router with added question routes
-    m := NewRouter(routes)
-    //The response recorder used to record HTTP responses
-    respRec := httptest.NewRecorder()
+	//mux router with added question routes
+	m := router.NewRouter(routes)
+	//The response recorder used to record HTTP responses
+	respRec := httptest.NewRecorder()
 
-    return m, respRec
+	return m, respRec
 }
 
-/* 
-Tests for GetStock method 
+/*
+Tests for GetStock method
 */
 type getStockProvider struct {
-    value string
-    result int
+	value  string
+	result int
 }
-var testGetStockProvider = []getStockProvider {
-	{"/stock/", http.StatusNotFound}, // url not found
+
+var testGetStockProvider = []getStockProvider{
+	{"/stock/", http.StatusNotFound},    // url not found
 	{"/stock/SAC", http.StatusNotFound}, // sku not found
-	{"/stock/SC", http.StatusOK}, // sku found
+	{"/stock/SC", http.StatusOK},        // sku found
 }
+
 func TestGetStock(t *testing.T) {
 	for _, pair := range testGetStockProvider {
 		m, rr := setupServerStock()
-	    req, err := http.NewRequest("GET", pair.value, nil)
-	    if err != nil {
-	        t.Fatal("TestGetStock failed!")
-	    }
+		req, err := http.NewRequest("GET", pair.value, nil)
+		if err != nil {
+			t.Fatal("TestGetStock failed!")
+		}
 
-	    m.ServeHTTP(rr, req)
+		m.ServeHTTP(rr, req)
 		assert.Equal(t, rr.Code, pair.result, "Code doesn't match")
 	}
 }
 
-
-/* 
+/*
 Test for PutStock method
 */
 type putStockProvider struct {
-    value string
-    json string
-    result int
+	value  string
+	json   string
+	result int
 }
-var testPutStockProvider = []putStockProvider {
+
+var testPutStockProvider = []putStockProvider{
 	{"/stock/", "", http.StatusNotFound},
 	{"/stock/SAC", `{"quantity":10}`, http.StatusBadRequest},
 	{"/stock/SAC", `{"quantity":10, "warehouse":"C"}`, http.StatusInternalServerError}, // UPDATE NOK
-	{"/stock/SC", `{"quantity":10, "warehouse":"A"}`, http.StatusOK}, // UPDATE OK
-	{"/stock/SC", `{"quantity":10, "warehouse":"B"}`, http.StatusOK}, // INSERT OK
-	{"/stock/SC", `{"quantity":10, "warehouse":"C"}`, http.StatusInternalServerError}, // UPDATE NOK
-	{"/stock/SC", `{"quantity":10, "warehouse":"D"}`, http.StatusInternalServerError}, // INSERT NOK
+	{"/stock/SC", `{"quantity":10, "warehouse":"A"}`, http.StatusOK},                   // UPDATE OK
+	{"/stock/SC", `{"quantity":10, "warehouse":"B"}`, http.StatusOK},                   // INSERT OK
+	{"/stock/SC", `{"quantity":10, "warehouse":"C"}`, http.StatusInternalServerError},  // UPDATE NOK
+	{"/stock/SC", `{"quantity":10, "warehouse":"D"}`, http.StatusInternalServerError},  // INSERT NOK
 }
+
 func TestPutStock(t *testing.T) {
 	for _, pair := range testPutStockProvider {
 		m, rr := setupServerStock()
@@ -108,13 +114,13 @@ func TestPutStock(t *testing.T) {
 			val = bytes.NewBuffer(jsonStr)
 		}
 
-	    req, err := http.NewRequest("PUT", pair.value, val)
-	    req.Header.Set("Content-Type", "application/json")
-	    if err != nil {
-	        t.Fatal("TestPutStock failed!")
-	    }
+		req, err := http.NewRequest("PUT", pair.value, val)
+		req.Header.Set("Content-Type", "application/json")
+		if err != nil {
+			t.Fatal("TestPutStock failed!")
+		}
 
-	    m.ServeHTTP(rr, req)
+		m.ServeHTTP(rr, req)
 		assert.Equal(t, rr.Code, pair.result, "Code doesn't match")
 	}
 }

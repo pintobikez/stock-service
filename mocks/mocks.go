@@ -9,10 +9,10 @@ import (
 type RepositoryMock struct {
 }
 
-func (o *RepositoryMock) connectDB(st string) {
+func (o *RepositoryMock) ConnectDB(st string) {
 	return
 }
-func (o *RepositoryMock) disconnectDB() {
+func (o *RepositoryMock) DisconnectDB() {
 	return
 }
 func (o *RepositoryMock) RepoFindBySkuAndWharehouse(sku string, warehouse string) (*gen.Sku, error) {
@@ -35,8 +35,8 @@ func (o *RepositoryMock) RepoFindSku(sku string) (*gen.SkuResponse, error) {
 			Sku:       "SC",
 			Reserved:  1,
 			Available: 10,
-			Values: []SkuValues{
-				SkuValues{10, "B"},
+			Values: []gen.SkuValues{
+				gen.SkuValues{10, "B"},
 			},
 		}, nil
 	}
