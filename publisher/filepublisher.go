@@ -1,7 +1,7 @@
 package publisher
 
 import (
-	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
+	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
 	"encoding/json"
 	"os"
 )

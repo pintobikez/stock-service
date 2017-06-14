@@ -14,12 +14,6 @@ App requires Golang 1.8 or later, Glide Package Manager and Docker (for building
 ## Build
 For building binaries please use make, look at the commands bellow:
 
-
-To manually build the app use:
-```
-CGO_ENABLED=0 go build -o ./build/stock-service -ldflags "-s -w" -tags netgo -a -v
-```
-
 ```
 // Build the binary in your environment
 $ make build
@@ -71,6 +65,12 @@ $ make test-coverage
 
 // Running tests with junit report. Output coverage file: report.xml
 $ make test-report
+```
+
+## Run it
+```
+// Run and launch docker
+$ make build; docker build -t stock-service-docker .; docker-compose up;
 ```
 
 ## Usage:

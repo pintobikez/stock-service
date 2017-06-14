@@ -2,10 +2,11 @@ package main
 
 import (
 	api "bitbucket.org/ricardomvpinto/stock-service/api"
+	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
+	cnf "bitbucket.org/ricardomvpinto/stock-service/config"
 	pub "bitbucket.org/ricardomvpinto/stock-service/publisher"
 	rep "bitbucket.org/ricardomvpinto/stock-service/repository"
 	rou "bitbucket.org/ricardomvpinto/stock-service/router"
-	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 	"log"
 	"net/http"
 	"os"
@@ -21,7 +22,7 @@ var repo *rep.Repository = new(rep.Repository)
 var pubsub *pub.FilePublisher = new(pub.FilePublisher)
 
 func buildStringConnection(filename string) string {
-	t, err := gen.LoadConfigFile(filename)
+	t, err := cnf.LoadConfigFile(filename)
 	if err != nil {
 		panic(err)
 	}

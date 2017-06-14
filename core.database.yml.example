@@ -1,6 +1,6 @@
 driver:
-    host: {{ db_hostname }}
-    user: {{ db_username }}
-    pw: {{ db_user_password }}
-    port: {{ db_port }}
-    schema: {{ db_schema }}
+    host: "mysql"
+    user: root
+    pw: root
+    port: 3306
+    schema: stockservice

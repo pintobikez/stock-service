@@ -1,9 +1,10 @@
 package router
 
 import (
+	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
+	cnf "bitbucket.org/ricardomvpinto/stock-service/config"
 	"github.com/gorilla/mux"
 	"net/http"
-	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 )
 
 func NewRouter(routes gen.Routes) *mux.Router {
@@ -13,7 +14,7 @@ func NewRouter(routes gen.Routes) *mux.Router {
 		var handler http.Handler
 
 		handler = route.HandlerFunc
-		handler = gen.Logger(handler, route.Name)
+		handler = cnf.Logger(handler, route.Name)
 
 		router.
 			Methods(route.Method).

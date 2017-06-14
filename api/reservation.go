@@ -1,7 +1,7 @@
 package api
 
 import (
-	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
+	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"

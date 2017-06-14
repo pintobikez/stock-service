@@ -7,7 +7,7 @@ ARG APP_NAME=stock-service
 RUN apk add --no-cache ca-certificates
 
 ADD ./build/$APP_NAME /app
-ADD ./config/core.database.yml /
+ADD ./core.database.yml.example /core.database.yml
 ADD ./queue.json /
 
 # Environment Variables

@@ -1,9 +1,9 @@
 package api
 
 import (
+	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
 	mock "bitbucket.org/ricardomvpinto/stock-service/mocks"
 	"bitbucket.org/ricardomvpinto/stock-service/router"
-	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
 	"bytes"
 	"fmt"
 	"github.com/gorilla/mux"

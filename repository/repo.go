@@ -1,7 +1,7 @@
 package repository
 
 import (
-	gen "bitbucket.org/ricardomvpinto/stock-service/utils"
+	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
