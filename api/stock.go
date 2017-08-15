@@ -2,9 +2,9 @@ package api
 
 import (
 	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo"
 	"net/http"
 )
 
@@ -23,105 +23,75 @@ func ValidateSku(s gen.Sku) error {
 }
 
 // Handler to GET Stock request
-func GetStock(rp gen.RepositoryDefinition) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
-		vars := mux.Vars(r)
+func GetStock(rp gen.RepositoryDefinition) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		var skuResponse *gen.SkuResponse
 		var err error
 
-		skuValue, isset := vars["sku"]
-		if !isset {
-			w.WriteHeader(http.StatusBadRequest)
-			return
+		skuValue := c.Param("sku")
+		if skuValue == "" {
+			return c.JSON(http.StatusBadRequest, "Sku not set")
 		}
 
 		skuResponse, err = rp.RepoFindSku(skuValue)
 		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
-			if err2 := json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusNotFound, Text: err.Error()}); err2 != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			return
+			return c.JSON(http.StatusNotFound, gen.JsonErr{Code: http.StatusNotFound, Text: err.Error()})
 		}
 
-		if err = json.NewEncoder(w).Encode(skuResponse); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		/*if res, err2 := json.Marshal(skuResponse); err2 != nil {
+			return c.JSON(http.StatusInternalServerError, gen.JsonErr{Code: http.StatusInternalServerError, Text: err2.Error()})
+		}*/
 
-		return
+		return c.JSON(http.StatusOK, skuResponse)
 	}
 }
 
 // Handler to PUT Stock request
-func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) echo.HandlerFunc {
+	return func(c echo.Context) error {
 
 		var err error
-		var isset bool
 		var af int64 = 1
 
-		vars := mux.Vars(r)
 		var s gen.Sku
-		if err := json.NewDecoder(r.Body).Decode(&s); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
-			return
+		if err := c.Bind(&s); err != nil {
+			return c.JSON(http.StatusBadRequest, gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
 		}
 
-		if s.Sku, isset = vars["sku"]; !isset {
-			w.WriteHeader(http.StatusBadRequest)
-			return
+		if s.Sku = c.Param("sku"); s.Sku == "" {
+			return c.JSON(http.StatusBadRequest, "Sku not set")
 		}
 
 		if err := ValidateSku(s); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
-			return
+			return c.JSON(http.StatusBadRequest, gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
 		}
 
 		f, erre := rp.RepoFindBySkuAndWharehouse(s.Sku, s.Warehouse)
 		if erre != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusInternalServerError, Text: erre.Error()})
-			return
+			return c.JSON(http.StatusInternalServerError, gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
 		}
 
 		if f.Sku != "" {
 			if af, err = rp.RepoUpdateSku(s); err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
-				return
+				return c.JSON(http.StatusInternalServerError, gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
 			}
 		} else {
 			if err = rp.RepoInsertSku(s); err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
-				return
+				return c.JSON(http.StatusInternalServerError, gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
 			}
 		}
 
-		json.NewEncoder(w).Encode(s)
 		if af > 0 { //publish message
 			skuResponse, err := rp.RepoFindSku(s.Sku)
 			if err != nil {
-				w.WriteHeader(http.StatusNotFound)
-				json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusNotFound, Text: "Sku " + s.Sku + " not found"})
-				return
+				return c.JSON(http.StatusNotFound, gen.JsonErr{Code: http.StatusNotFound, Text: "Sku " + s.Sku + " not found"})
 			}
 
 			if err := p.Publish(skuResponse); err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
-				return
+				return c.JSON(http.StatusInternalServerError, gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
 			}
 		}
 
-		defer r.Body.Close()
-
-		return
+		return c.NoContent(http.StatusOK)
 	}
 }

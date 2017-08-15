@@ -8,59 +8,88 @@ LDFLAGS=--ldflags '-X main.version=${APP_VERSION} -X main.appName=${APP_NAME} -e
 OS=linux
 
 DOCKER_NS=gfgit
-DOCKER_IMAGE=gfgit/golang-ci:1.8
+DOCKER_IMAGE=gfgit/golang-ci:1.8.3
 
 .DEFAULT_GOAL := build
 
 build: depend configure
+ifeq (${RUN},docker)
 	@docker run --rm \
         -v "$(shell pwd)":/go/src/${APP_PATH} \
         -w /go/src/${APP_PATH} \
-        ${DOCKER_IMAGE} sh -c "CGO_ENABLED=0 GOOS=${OS} \
-            && go build -a ${LDFLAGS} -tags netgo -installsuffix netgo -v \
-            -o ./build/${APP_NAME}"
+        ${DOCKER_IMAGE} sh -c "make OS=${OS} APP_NAME=${APP_NAME} APP_VERSION=${APP_VERSION}"
+else
+	@CGO_ENABLED=0 GOOS=${OS} go build -a ${LDFLAGS} -tags netgo -installsuffix netgo -v \
+    -o ./build/${APP_NAME} bitbucket.org/ricardomvpinto/stock-service/cmd
+endif
 
 clean:
+ifeq (${RUN},docker)
 	@docker run --rm \
         -v "$(shell pwd)":/go/src/${APP_PATH} \
         -w /go/src/${APP_PATH} \
-        ${DOCKER_IMAGE} sh -c "rm -fR vendor/ ./build ./.glide/"
+        ${DOCKER_IMAGE} sh -c "make clean"
+else
+	@rm -fR vendor/ ./build ./.glide/
+endif
 
 configure:
+ifeq (${RUN},docker)
 	@docker run --rm \
         -v "$(shell pwd)":/go/src/${APP_PATH} \
         -w /go/src/${APP_PATH} \
-        ${DOCKER_IMAGE} sh -c "glide install"
+        ${DOCKER_IMAGE} sh -c "make configure"
+else
+	@glide install
+endif
 
 depend:
-	@command -v docker > /dev/null 2>&1 || ( echo "Please install Docker https://docs.docker.com/engine/installation/" && exit 1 )
+ifeq (${RUN},docker)
+	@docker run --rm \
+        -v "$(shell pwd)":/go/src/${APP_PATH} \
+        -w /go/src/${APP_PATH} \
+        ${DOCKER_IMAGE} sh -c "make depend"
+else
 	@mkdir -p ./build
+endif
 
 pack: depend
+	@command -v docker > /dev/null 2>&1 || ( echo "Please install Docker https://docs.docker.com/engine/installation/" && exit 1 )
 	@docker build -t ${DOCKER_NS}/${APP_NAME}:${APP_VERSION} --build-arg APP_NAME=${APP_NAME} -f ./Dockerfile .
 
 test:
+ifeq (${RUN},docker)
 	@docker run --rm \
         -v "$(shell pwd)":/go/src/${APP_PATH} \
         -w /go/src/${APP_PATH} \
-        ${DOCKER_IMAGE} sh -c "go test -v \$$(glide novendor)"
+        ${DOCKER_IMAGE} sh -c "make test"
+else
+	@go test -v $(shell glide novendor)
+endif
 
 test-coverage: depend
+ifeq (${RUN},docker)
 	@docker run --rm \
         -v "$(shell pwd)":/go/src/${APP_PATH} \
         -w /go/src/${APP_PATH} \
-        ${DOCKER_IMAGE} sh -c '\
-            echo "mode: set" > ./build/coverage.out; \
-            for i in $$(go list ./... | grep -v "vendor"); do \
-                go test -coverprofile=./build/cover.out $$i; \
-                test -f ./build/cover.out && tail -n +2 ./build/cover.out >> ./build/coverage.out; \
-            done; \
-            go tool cover -html=./build/coverage.out -o ./build/coverage.html; \
-            test -f ./build/cover.out && rm ./build/cover.out; \
-            test -f ./build/coverage.out && rm ./build/coverage.out;'
+        ${DOCKER_IMAGE} sh -c 'make test-coverage'
+else
+	@echo "mode: set" > ./build/coverage.out; \
+    for i in $$(go list ./... | grep -v "vendor"); do \
+        go test -coverprofile=./build/cover.out $$i; \
+        test -f ./build/cover.out && tail -n +2 ./build/cover.out >> ./build/coverage.out; \
+    done; \
+    go tool cover -html=./build/coverage.out -o ./build/coverage.html; \
+    test -f ./build/cover.out && rm ./build/cover.out; \
+    test -f ./build/coverage.out && rm ./build/coverage.out;
+endif
 
 test-report: depend
+ifeq (${RUN},docker)
 	@docker run --rm \
         -v "$(shell pwd)":/go/src/${APP_PATH} \
         -w /go/src/${APP_PATH} \
-        ${DOCKER_IMAGE} sh -c "go test -v \$$(glide novendor) | go-junit-report > ./build/report.xml"
+        ${DOCKER_IMAGE} sh -c "make test-report"
+else
+	@go test -v $(shell glide novendor) | go-junit-report > ./build/report.xml
+endif

@@ -13,12 +13,13 @@ type Repository struct {
 }
 
 // Connects to the mysql database
-func (r *Repository) ConnectDB(stringConn string) {
+func (r *Repository) ConnectDB(stringConn string) error {
 	var err error
 	r.db, err = sql.Open("mysql", stringConn)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Disconnects from the mysql database

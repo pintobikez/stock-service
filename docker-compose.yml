@@ -15,7 +15,7 @@ services:
     stock:
       image: stock-service-docker
       ports:
-        - 8080:8080
+        - 8000:8000
       networks:
             - default_network_name
 

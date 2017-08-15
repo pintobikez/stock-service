@@ -7,7 +7,7 @@ type PubSub interface {
 }
 
 type RepositoryDefinition interface {
-	ConnectDB(stringConn string)
+	ConnectDB(stringConn string) error
 	DisconnectDB()
 	RepoFindBySkuAndWharehouse(sku string, warehouse string) (*Sku, error)
 	RepoFindSku(sku string) (*SkuResponse, error)

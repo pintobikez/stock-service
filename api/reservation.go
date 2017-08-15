@@ -2,9 +2,8 @@ package api
 
 import (
 	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
-	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo"
 	"net/http"
 )
 
@@ -20,7 +19,7 @@ func ValidateReservation(res gen.Reservation) error {
 }
 
 // Processes a Reservation request
-func ProcessRequest(w http.ResponseWriter, r gen.Reservation, put bool, rp gen.RepositoryDefinition, p gen.PubSub) (int, error) {
+func ProcessRequest(r gen.Reservation, put bool, rp gen.RepositoryDefinition, p gen.PubSub) (int, error) {
 	var skuFound *gen.Sku
 
 	if err := ValidateReservation(r); err != nil {
@@ -62,64 +61,43 @@ func ProcessRequest(w http.ResponseWriter, r gen.Reservation, put bool, rp gen.R
 }
 
 // Handler to PUT Reservation request
-func PutReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
+func PutReservation(rp gen.RepositoryDefinition, p gen.PubSub) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		var res gen.Reservation
-		var isset bool
 
-		if err := json.NewDecoder(r.Body).Decode(&res); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
-			return
+		if err := c.Bind(&res); err != nil {
+			return c.JSON(http.StatusBadRequest, gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
 		}
 
-		if res.Sku, isset = vars["sku"]; !isset {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: "Sku not set"})
-			return
+		if res.Sku = c.Param("sku"); res.Sku == "" {
+			return c.JSON(http.StatusBadRequest, "Sku not set")
 		}
 
-		code, err := ProcessRequest(w, res, true, rp, p)
-		w.WriteHeader(code)
-		if err != nil {
-			json.NewEncoder(w).Encode(gen.JsonErr{Code: code, Text: err.Error()})
+		if code, err := ProcessRequest(res, true, rp, p); err != nil {
+			return c.JSON(code, gen.JsonErr{Code: code, Text: err.Error()})
 		}
 
-		defer r.Body.Close()
-
-		return
+		return c.NoContent(http.StatusOK)
 	}
 }
 
 // Handler to DELETE Reservation request
-func RemoveReservation(rp gen.RepositoryDefinition, p gen.PubSub) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
+func RemoveReservation(rp gen.RepositoryDefinition, p gen.PubSub) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		var res gen.Reservation
-		var isset bool
 
-		if err := json.NewDecoder(r.Body).Decode(&res); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
-			return
+		if err := c.Bind(&res); err != nil {
+			return c.JSON(http.StatusBadRequest, gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
 		}
 
-		if res.Sku, isset = vars["sku"]; !isset {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(gen.JsonErr{Code: http.StatusBadRequest, Text: "Sku not set"})
-			return
+		if res.Sku = c.Param("sku"); res.Sku == "" {
+			return c.JSON(http.StatusBadRequest, "Sku not set")
 		}
 
-		if code, err := ProcessRequest(w, res, false, rp, p); err != nil {
-			w.WriteHeader(code)
-			json.NewEncoder(w).Encode(gen.JsonErr{Code: code, Text: err.Error()})
-		} else {
-			w.WriteHeader(code)
+		if code, err := ProcessRequest(res, false, rp, p); err != nil {
+			return c.JSON(code, gen.JsonErr{Code: code, Text: err.Error()})
 		}
 
-		defer r.Body.Close()
-
-		return
+		return c.NoContent(http.StatusOK)
 	}
 }

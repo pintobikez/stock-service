@@ -11,7 +11,7 @@ ADD ./core.database.yml.example /core.database.yml
 ADD ./queue.json /
 
 # Environment Variables
-ENV SS_LISTEN "0.0.0.0:8080"
-ENV SS_DATABASE_FILE "core.database.yml"
+ENV LISTEN "0.0.0.0:8080"
+ENV DATABASE_FILE "core.database.yml"
 
 CMD ["/app"]

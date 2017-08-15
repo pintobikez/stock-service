@@ -5,6 +5,14 @@ import:
   subpackages:
   - assert
 - package: gopkg.in/yaml.v2
+- package: gopkg.in/urfave/cli.v1
+- package: github.com/coreos/go-systemd/activation
+- package: github.com/dafiti/go-instrument
 - package: github.com/gorilla/mux
 - package: github.com/go-sql-driver/mysql
 - package: github.com/pkg/errors
+- package: github.com/labstack/echo
+- package: github.com/labstack/echo/middleware
+- package: github.com/labstack/gommon/color
+- package: github.com/labstack/gommon/log
+- package: github.com/coreos/go-systemd/activation
