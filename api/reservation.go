@@ -66,15 +66,15 @@ func PutReservation(rp gen.RepositoryDefinition, p gen.PubSub) echo.HandlerFunc 
 		var res gen.Reservation
 
 		if err := c.Bind(&res); err != nil {
-			return c.JSON(http.StatusBadRequest, gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
+			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, err.Error()}})
 		}
 
 		if res.Sku = c.Param("sku"); res.Sku == "" {
-			return c.JSON(http.StatusBadRequest, "Sku not set")
+			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, "Sku not set"}})
 		}
 
 		if code, err := ProcessRequest(res, true, rp, p); err != nil {
-			return c.JSON(code, gen.JsonErr{Code: code, Text: err.Error()})
+			return c.JSON(code, &ErrResponse{ErrContent{code, err.Error()}})
 		}
 
 		return c.NoContent(http.StatusOK)
@@ -87,15 +87,15 @@ func RemoveReservation(rp gen.RepositoryDefinition, p gen.PubSub) echo.HandlerFu
 		var res gen.Reservation
 
 		if err := c.Bind(&res); err != nil {
-			return c.JSON(http.StatusBadRequest, gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
+			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, err.Error()}})
 		}
 
 		if res.Sku = c.Param("sku"); res.Sku == "" {
-			return c.JSON(http.StatusBadRequest, "Sku not set")
+			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, "Sku not set"}})
 		}
 
 		if code, err := ProcessRequest(res, false, rp, p); err != nil {
-			return c.JSON(code, gen.JsonErr{Code: code, Text: err.Error()})
+			return c.JSON(code, &ErrResponse{ErrContent{code, err.Error()}})
 		}
 
 		return c.NoContent(http.StatusOK)

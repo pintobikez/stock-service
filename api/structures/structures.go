@@ -26,11 +26,6 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
-type JsonErr struct {
-	Code int    `json:"code"`
-	Text string `json:"text"`
-}
-
 type Sku struct {
 	Sku       string `json:"sku"`
 	Quantity  int64  `json:"quantity"`

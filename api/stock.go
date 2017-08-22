@@ -2,7 +2,6 @@ package api
 
 import (
 	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
-	//"encoding/json"
 	"fmt"
 	"github.com/labstack/echo"
 	"net/http"
@@ -30,17 +29,13 @@ func GetStock(rp gen.RepositoryDefinition) echo.HandlerFunc {
 
 		skuValue := c.Param("sku")
 		if skuValue == "" {
-			return c.JSON(http.StatusBadRequest, "Sku not set")
+			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, "Sku not set"}})
 		}
 
 		skuResponse, err = rp.RepoFindSku(skuValue)
 		if err != nil {
-			return c.JSON(http.StatusNotFound, gen.JsonErr{Code: http.StatusNotFound, Text: err.Error()})
+			return c.JSON(http.StatusNotFound, &ErrResponse{ErrContent{http.StatusNotFound, err.Error()}})
 		}
-
-		/*if res, err2 := json.Marshal(skuResponse); err2 != nil {
-			return c.JSON(http.StatusInternalServerError, gen.JsonErr{Code: http.StatusInternalServerError, Text: err2.Error()})
-		}*/
 
 		return c.JSON(http.StatusOK, skuResponse)
 	}
@@ -55,40 +50,40 @@ func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) echo.HandlerFunc {
 
 		var s gen.Sku
 		if err := c.Bind(&s); err != nil {
-			return c.JSON(http.StatusBadRequest, gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
+			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, err.Error()}})
 		}
 
 		if s.Sku = c.Param("sku"); s.Sku == "" {
-			return c.JSON(http.StatusBadRequest, "Sku not set")
+			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, "Sku not set"}})
 		}
 
 		if err := ValidateSku(s); err != nil {
-			return c.JSON(http.StatusBadRequest, gen.JsonErr{Code: http.StatusBadRequest, Text: err.Error()})
+			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, err.Error()}})
 		}
 
 		f, erre := rp.RepoFindBySkuAndWharehouse(s.Sku, s.Warehouse)
 		if erre != nil {
-			return c.JSON(http.StatusInternalServerError, gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
+			return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{http.StatusInternalServerError, err.Error()}})
 		}
 
 		if f.Sku != "" {
 			if af, err = rp.RepoUpdateSku(s); err != nil {
-				return c.JSON(http.StatusInternalServerError, gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
+				return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{http.StatusInternalServerError, err.Error()}})
 			}
 		} else {
 			if err = rp.RepoInsertSku(s); err != nil {
-				return c.JSON(http.StatusInternalServerError, gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
+				return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{http.StatusInternalServerError, err.Error()}})
 			}
 		}
 
 		if af > 0 { //publish message
 			skuResponse, err := rp.RepoFindSku(s.Sku)
 			if err != nil {
-				return c.JSON(http.StatusNotFound, gen.JsonErr{Code: http.StatusNotFound, Text: "Sku " + s.Sku + " not found"})
+				return c.JSON(http.StatusNotFound, &ErrResponse{ErrContent{http.StatusInternalServerError, fmt.Sprintf("Sku %s not found", s.Sku)}})
 			}
 
 			if err := p.Publish(skuResponse); err != nil {
-				return c.JSON(http.StatusInternalServerError, gen.JsonErr{Code: http.StatusInternalServerError, Text: err.Error()})
+				return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{http.StatusInternalServerError, err.Error()}})
 			}
 		}
 

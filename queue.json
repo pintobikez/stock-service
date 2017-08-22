@@ -1,0 +1,4 @@
+{"sku":"ABCDE","values":[{"quantity":20,"warehouse":"B"}],"reserved":0,"avail":20}
+{"sku":"ABCDE","values":[{"quantity":20,"warehouse":"B"}],"reserved":1,"avail":19}
+{"sku":"ABCDE","values":[{"quantity":20,"warehouse":"B"}],"reserved":2,"avail":18}
+{"sku":"ABCDE","values":[{"quantity":20,"warehouse":"B"}],"reserved":1,"avail":19}

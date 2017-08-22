@@ -8,7 +8,7 @@ import (
 	rep "bitbucket.org/ricardomvpinto/stock-service/repository"
 	srv "bitbucket.org/ricardomvpinto/stock-service/server"
 	"context"
-	"github.com/dafiti/echo-middleware"
+	middleware "github.com/dafiti/echo-middleware"
 	inst "github.com/dafiti/go-instrument"
 	"github.com/labstack/echo"
 	mw "github.com/labstack/echo/middleware"
@@ -66,10 +66,10 @@ func Serve(c *cli.Context) error {
 	}
 
 	// Routes => api
-	e.PUT("/stock/{sku}", api.PutStock(repo, pubsub))
-	e.PUT("/reservation/{sku}", api.PutReservation(repo, pubsub))
-	e.DELETE("/reservation/{sku}", api.RemoveReservation(repo, pubsub))
-	e.GET("/stock/{sku}", api.GetStock(repo))
+	e.PUT("/stock/:sku", api.PutStock(repo, pubsub))
+	e.PUT("/reservation/:sku", api.PutReservation(repo, pubsub))
+	e.DELETE("/reservation/:sku", api.RemoveReservation(repo, pubsub))
+	e.GET("/stock/:sku", api.GetStock(repo))
 
 	if c.String("revision-file") != "" {
 		e.File("/rev.txt", c.String("revision-file"))

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/labstack/gommon/color"
-	//errors "github.com/pkg/errors"
 	"gopkg.in/urfave/cli.v1"
 )
 
