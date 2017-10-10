@@ -2,13 +2,15 @@ package api
 
 import (
 	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
+	pub "bitbucket.org/ricardomvpinto/stock-service/publisher"
+	repo "bitbucket.org/ricardomvpinto/stock-service/repository"
 	"fmt"
 	"github.com/labstack/echo"
 	"net/http"
 )
 
 // Validates the consistency of the Sku struct
-func ValidateSku(s gen.Sku) error {
+func ValidateSku(s *gen.Sku) error {
 	if s.Sku == "" {
 		return fmt.Errorf("Sku is empty")
 	}
@@ -22,17 +24,12 @@ func ValidateSku(s gen.Sku) error {
 }
 
 // Handler to GET Stock request
-func GetStock(rp gen.RepositoryDefinition) echo.HandlerFunc {
+func GetStock(rp repo.IRepository) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var skuResponse *gen.SkuResponse
-		var err error
 
 		skuValue := c.Param("sku")
-		if skuValue == "" {
-			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, "Sku not set"}})
-		}
+		skuResponse, err := rp.RepoFindSku(skuValue)
 
-		skuResponse, err = rp.RepoFindSku(skuValue)
 		if err != nil {
 			return c.JSON(http.StatusNotFound, &ErrResponse{ErrContent{http.StatusNotFound, err.Error()}})
 		}
@@ -42,36 +39,34 @@ func GetStock(rp gen.RepositoryDefinition) echo.HandlerFunc {
 }
 
 // Handler to PUT Stock request
-func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) echo.HandlerFunc {
+func PutStock(rp repo.IRepository, p pub.IPubSub) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		var err error
 		var af int64 = 1
+		var s *gen.Sku
 
-		var s gen.Sku
 		if err := c.Bind(&s); err != nil {
 			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, err.Error()}})
 		}
 
-		if s.Sku = c.Param("sku"); s.Sku == "" {
-			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, "Sku not set"}})
-		}
+		s.Sku = c.Param("sku")
 
 		if err := ValidateSku(s); err != nil {
 			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, err.Error()}})
 		}
 
-		f, erre := rp.RepoFindBySkuAndWharehouse(s.Sku, s.Warehouse)
-		if erre != nil {
+		f, err := rp.RepoFindBySkuAndWharehouse(s.Sku, s.Warehouse)
+		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{http.StatusInternalServerError, err.Error()}})
 		}
 
 		if f.Sku != "" {
-			if af, err = rp.RepoUpdateSku(s); err != nil {
+			af, err = rp.RepoUpdateSku(s)
+			if err != nil {
 				return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{http.StatusInternalServerError, err.Error()}})
 			}
 		} else {
-			if err = rp.RepoInsertSku(s); err != nil {
+			if err := rp.RepoInsertSku(s); err != nil {
 				return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{http.StatusInternalServerError, err.Error()}})
 			}
 		}
@@ -79,7 +74,7 @@ func PutStock(rp gen.RepositoryDefinition, p gen.PubSub) echo.HandlerFunc {
 		if af > 0 { //publish message
 			skuResponse, err := rp.RepoFindSku(s.Sku)
 			if err != nil {
-				return c.JSON(http.StatusNotFound, &ErrResponse{ErrContent{http.StatusInternalServerError, fmt.Sprintf("Sku %s not found", s.Sku)}})
+				return c.JSON(http.StatusNotFound, &ErrResponse{ErrContent{http.StatusInternalServerError, fmt.Sprintf(SkuNotFound, s.Sku)}})
 			}
 
 			if err := p.Publish(skuResponse); err != nil {

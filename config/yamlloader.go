@@ -1,7 +1,7 @@
 package utils
 
 import (
-	errors "github.com/pkg/errors"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
@@ -13,19 +13,8 @@ var (
 	ErrUnableToParseFile = "Unable to parse the file storage"
 )
 
-type YmlConfig struct {
-	Driver struct {
-		Host   string
-		User   string
-		Pw     string
-		Port   int
-		Schema string
-	}
-}
-
-// Loads the given Yaml file into a YmlConfig structure
-func LoadConfigFile(filename string) (*YmlConfig, error) {
-
+// Loads a Yaml file and returns it
+func LoadYamlFile(filename string) ([]byte, error) {
 	filename, err := filepath.Abs(filename)
 	if err != nil {
 		return nil, errors.Wrap(err, ErrInvalidFile)
@@ -36,11 +25,20 @@ func LoadConfigFile(filename string) (*YmlConfig, error) {
 		return nil, errors.Wrap(err, ErrUnableToReadFile)
 	}
 
-	conf := new(YmlConfig)
+	return file, nil
+}
 
-	if err = yaml.Unmarshal(file, conf); err != nil {
-		return nil, errors.Wrap(err, ErrUnableToParseFile)
+// Loads the given Yaml file into the Structure
+func LoadConfigFile(filename string, c interface{}) error {
+
+	file, err := LoadYamlFile(filename)
+	if err != nil {
+		return err
 	}
 
-	return conf, nil
+	if err = yaml.Unmarshal(file, c); err != nil {
+		return errors.Wrap(err, ErrUnableToParseFile)
+	}
+
+	return nil
 }

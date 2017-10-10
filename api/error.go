@@ -5,6 +5,11 @@ import (
 	"net/http"
 )
 
+var (
+	SkuNotFound            = "Sku %s not found"
+	ReservationDeleteError = "No reservation found for Sku %s and Warehouse %s"
+)
+
 type (
 	ErrResponse struct {
 		Error ErrContent `json:"error"`

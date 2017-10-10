@@ -1,16 +1,13 @@
 package server
 
 import (
-	//"errors"
 	"github.com/coreos/go-systemd/activation"
 	"github.com/labstack/echo"
 )
 
-type (
-	Server struct {
-		*echo.Echo
-	}
-)
+type Server struct {
+	*echo.Echo
+}
 
 // Start starts an HTTP server.
 func (srv *Server) Start(address string) error {

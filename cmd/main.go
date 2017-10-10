@@ -54,22 +54,31 @@ func main() {
 			EnvVar: "DATABASE_FILE",
 		},
 		cli.StringFlag{
+			Name:   "publisher-file",
+			Value:  "",
+			Usage:  "Pubsub configuration used by Stock Service to connect to the Pubsub service",
+			EnvVar: "PUBLISHER_FILE",
+		},
+		cli.StringFlag{
 			Name:   "swagger-file",
 			Value:  "",
 			Usage:  "Expose the swagger file",
 			EnvVar: "SWAGGER_FILE",
 		},
-	}
-
-	app.Commands = []cli.Command{
-		cli.Command{
-			Name:   "check",
-			Usage:  "Check if the configuration and dependencies are ok",
-			Action: Check,
+		cli.StringFlag{
+			Name:   "ssl-cert",
+			Value:  "",
+			Usage:  "Define SSL certificate to accept HTTPS requests",
+			EnvVar: "SSL_CERT",
+		},
+		cli.StringFlag{
+			Name:   "ssl-key",
+			Value:  "",
+			Usage:  "Define SSL key to accept HTTPS requests",
+			EnvVar: "SSL_KEY",
 		},
 	}
 
-	app.Action = Serve
-
+	app.Action = Handler
 	app.Run(os.Args)
 }
