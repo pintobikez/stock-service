@@ -86,29 +86,25 @@ func Handler(c *cli.Context) error {
 	}
 
 	// Routes => api
-	e.PUT("/stock/:sku", api.PutStock(repo, pubsub))
-	e.Use(mw.CORSWithConfig(
+	e.PUT("/stock/:sku", api.PutStock(repo, pubsub), mw.CORSWithConfig(
 		mw.CORSConfig{
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{echo.PUT, echo.OPTIONS, echo.HEAD},
 		},
 	))
-	e.PUT("/reservation/:sku", api.PutReservation(repo, pubsub))
-	e.Use(mw.CORSWithConfig(
+	e.PUT("/reservation/:sku", api.PutReservation(repo, pubsub), mw.CORSWithConfig(
 		mw.CORSConfig{
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{echo.PUT, echo.OPTIONS, echo.HEAD},
 		},
 	))
-	e.DELETE("/reservation/:sku", api.RemoveReservation(repo, pubsub))
-	e.Use(mw.CORSWithConfig(
+	e.DELETE("/reservation/:sku", api.RemoveReservation(repo, pubsub), mw.CORSWithConfig(
 		mw.CORSConfig{
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{echo.DELETE, echo.OPTIONS, echo.HEAD},
 		},
 	))
-	e.GET("/stock/:sku", api.GetStock(repo))
-	e.Use(mw.CORSWithConfig(
+	e.GET("/stock/:sku", api.GetStock(repo), mw.CORSWithConfig(
 		mw.CORSConfig{
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{echo.GET, echo.OPTIONS, echo.HEAD},

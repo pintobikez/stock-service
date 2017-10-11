@@ -62,6 +62,12 @@ func (p *Rabbitmq) Close() {
 
 func (p *Rabbitmq) Publish(s *gen.SkuResponse) error {
 
+	if p.channel == nil || p.conn == nil {
+		if err = p.Connect(); err != nil {
+			return err
+		}
+	}
+
 	body, err := json.Marshal(s)
 	if err != nil {
 		return err

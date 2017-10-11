@@ -1,0 +1,5 @@
+host: "rabbitmq"
+user: root
+pw: root
+port: 5216
+exchange: stockservice
