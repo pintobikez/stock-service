@@ -1,5 +1,5 @@
-host: "rabbitmq"
+host: "172.31.0.1"
 user: root
 pw: root
-port: 5216
-exchange: stockservice
+port: 5672
+exchange: stockservice_exchange

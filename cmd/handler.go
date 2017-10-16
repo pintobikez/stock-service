@@ -20,7 +20,6 @@ import (
 	"gopkg.in/urfave/cli.v1"
 	"os"
 	"os/signal"
-	"strconv"
 	"time"
 )
 
@@ -28,11 +27,11 @@ var (
 	instrument inst.Instrument
 	repo       rep.IRepository
 	pubsub     pub.IPubSub
+	apiStruct  *api.API
 )
 
 func init() {
 	instrument = new(inst.Dummy)
-	repo = new(mysql.Repository)
 }
 
 // Start Http Server
@@ -62,20 +61,26 @@ func Handler(c *cli.Context) error {
 	e.Pre(mw.RemoveTrailingSlash())
 
 	//loads db connection
-	stringConn, err := buildStringConnection(c.String("database-file"))
+	dbConfig := new(cnfs.DatabaseConfig)
+	err := uti.LoadConfigFile(c.String("database-file"), dbConfig)
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
+
+	repo, err = mysql.New(dbConfig)
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
 
 	// Database connect
-	err = repo.ConnectDB(stringConn)
+	err = repo.ConnectDB()
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
 
 	//loads rabbitmq config
 	rbcnfg := new(cnfs.PublisherConfig)
-	err = uti.LoadConfigFile(c.String("rabbitmq-file"), rbcnfg)
+	err = uti.LoadConfigFile(c.String("publisher-file"), rbcnfg)
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
@@ -85,26 +90,35 @@ func Handler(c *cli.Context) error {
 		e.Logger.Fatal(err)
 	}
 
+	apiStruct = api.New(repo, pubsub)
+
 	// Routes => api
-	e.PUT("/stock/:sku", api.PutStock(repo, pubsub), mw.CORSWithConfig(
+	e.GET("/health", apiStruct.HealthStatus(), mw.CORSWithConfig(
+		mw.CORSConfig{
+			AllowOrigins: []string{"*"},
+			AllowMethods: []string{echo.GET, echo.OPTIONS, echo.HEAD},
+		},
+	))
+
+	e.PUT("/stock/:sku", apiStruct.PutStock(), mw.CORSWithConfig(
 		mw.CORSConfig{
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{echo.PUT, echo.OPTIONS, echo.HEAD},
 		},
 	))
-	e.PUT("/reservation/:sku", api.PutReservation(repo, pubsub), mw.CORSWithConfig(
+	e.PUT("/reservation/:sku", apiStruct.PutReservation(), mw.CORSWithConfig(
 		mw.CORSConfig{
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{echo.PUT, echo.OPTIONS, echo.HEAD},
 		},
 	))
-	e.DELETE("/reservation/:sku", api.RemoveReservation(repo, pubsub), mw.CORSWithConfig(
+	e.DELETE("/reservation/:sku", apiStruct.RemoveReservation(), mw.CORSWithConfig(
 		mw.CORSConfig{
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{echo.DELETE, echo.OPTIONS, echo.HEAD},
 		},
 	))
-	e.GET("/stock/:sku", api.GetStock(repo), mw.CORSWithConfig(
+	e.GET("/stock/:sku", apiStruct.GetStock(), mw.CORSWithConfig(
 		mw.CORSConfig{
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{echo.GET, echo.OPTIONS, echo.HEAD},
@@ -167,17 +181,4 @@ func start(e *srv.Server, c *cli.Context) error {
 	}
 
 	return e.Start(c.String("listen"))
-}
-
-func buildStringConnection(filename string) (string, error) {
-	t := new(cnfs.DatabaseConfig)
-	if err := uti.LoadConfigFile(filename, t); err != nil {
-		return "", err
-	}
-	// [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
-	stringConn := t.Driver.User + ":" + t.Driver.Pw
-	stringConn += "@tcp(" + t.Driver.Host + ":" + strconv.Itoa(t.Driver.Port) + ")"
-	stringConn += "/" + t.Driver.Schema + "?charset=utf8"
-
-	return stringConn, nil
 }

@@ -16,7 +16,7 @@ type (
 )
 
 // MOCK Repository - START
-func (c *RepositoryMock) ConnectDB(stringConn string) error {
+func (c *RepositoryMock) ConnectDB() error {
 	return nil
 }
 func (c *RepositoryMock) DisconnectDB() {
@@ -67,6 +67,12 @@ func (c *RepositoryMock) RepoDeleteReservation(re *gen.Reservation) error {
 	}
 	return nil
 }
+func (c *RepositoryMock) Health() error {
+	if c.Iserror {
+		return fmt.Errorf("Erro Health")
+	}
+	return nil
+}
 
 // MOCK Repository - END
 
@@ -74,6 +80,12 @@ func (c *RepositoryMock) RepoDeleteReservation(re *gen.Reservation) error {
 func (c *PublisherMock) Publish(s *gen.SkuResponse) error {
 	if s.Sku == "SCD" {
 		return fmt.Errorf("Erro")
+	}
+	return nil
+}
+func (c *PublisherMock) Health() error {
+	if c.Iserror {
+		return fmt.Errorf("Erro Health")
 	}
 	return nil
 }

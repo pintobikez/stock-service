@@ -1,7 +1,7 @@
 package api
 
 import (
-	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
+	strut "bitbucket.org/ricardomvpinto/stock-service/api/structures"
 	pub "bitbucket.org/ricardomvpinto/stock-service/publisher"
 	repo "bitbucket.org/ricardomvpinto/stock-service/repository"
 	"fmt"
@@ -9,17 +9,44 @@ import (
 	"net/http"
 )
 
-type Api struct {
+const (
+	StatusAvailable   = "Available"
+	StatusUnavailable = "Unavailable"
+)
+
+type API struct {
 	rp repo.IRepository
 	pb pub.IPubSub
 }
 
-func New(rpo repo.IRepository, p pub.IPubSub) *Api {
-	return &Api{rp: rpo, pb: p}
+func New(rpo repo.IRepository, p pub.IPubSub) *API {
+	return &API{rp: rpo, pb: p}
+}
+
+// Handler for Health Status
+func (a *API) HealthStatus() echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		resp := &strut.HealthStatus{
+			Pub:  &strut.HealthStatusDetail{Status: StatusAvailable, Detail: ""},
+			Repo: &strut.HealthStatusDetail{Status: StatusAvailable, Detail: ""},
+		}
+
+		if err := a.pb.Health(); err != nil {
+			resp.Pub.Status = StatusUnavailable
+			resp.Pub.Detail = err.Error()
+		}
+		if err := a.rp.Health(); err != nil {
+			resp.Repo.Status = StatusUnavailable
+			resp.Repo.Detail = err.Error()
+		}
+
+		return c.JSON(http.StatusOK, resp)
+	}
 }
 
 // Handler to GET Stock request
-func (a *Api) GetStock() echo.HandlerFunc {
+func (a *API) GetStock() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		skuValue := c.Param("sku")
@@ -34,11 +61,11 @@ func (a *Api) GetStock() echo.HandlerFunc {
 }
 
 // Handler to PUT Stock request
-func (a *Api) PutStock() echo.HandlerFunc {
+func (a *API) PutStock() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		var af int64 = 1
-		var s *gen.Sku
+		var s *strut.Sku
 
 		if err := c.Bind(&s); err != nil {
 			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, err.Error()}})
@@ -82,9 +109,9 @@ func (a *Api) PutStock() echo.HandlerFunc {
 }
 
 // Handler to PUT Reservation request
-func (a *Api) PutReservation() echo.HandlerFunc {
+func (a *API) PutReservation() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var res *gen.Reservation
+		var res *strut.Reservation
 
 		if err := c.Bind(&res); err != nil {
 			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, err.Error()}})
@@ -100,9 +127,9 @@ func (a *Api) PutReservation() echo.HandlerFunc {
 }
 
 // Handler to DELETE Reservation request
-func (a *Api) RemoveReservation() echo.HandlerFunc {
+func (a *API) RemoveReservation() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var res *gen.Reservation
+		var res *strut.Reservation
 
 		if err := c.Bind(&res); err != nil {
 			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{http.StatusBadRequest, err.Error()}})
@@ -118,8 +145,8 @@ func (a *Api) RemoveReservation() echo.HandlerFunc {
 }
 
 // Processes a Reservation request
-func (a *Api) processRequest(r *gen.Reservation, put bool) (int, error) {
-	var skuFound *gen.Sku
+func (a *API) processRequest(r *strut.Reservation, put bool) (int, error) {
+	var skuFound *strut.Sku
 
 	if err := a.validateReservation(r); err != nil {
 		return http.StatusBadRequest, err
@@ -160,7 +187,7 @@ func (a *Api) processRequest(r *gen.Reservation, put bool) (int, error) {
 }
 
 // Validates the consistency of the Sku struct
-func (a *Api) validateSku(s *gen.Sku) error {
+func (a *API) validateSku(s *strut.Sku) error {
 	if s.Sku == "" {
 		return fmt.Errorf("Sku is empty")
 	}
@@ -174,7 +201,7 @@ func (a *Api) validateSku(s *gen.Sku) error {
 }
 
 // Validates the consistency of the Reservation struct
-func (a *Api) validateReservation(res *gen.Reservation) error {
+func (a *API) validateReservation(res *strut.Reservation) error {
 	if res.Sku == "" {
 		return fmt.Errorf("Sku is empty")
 	}

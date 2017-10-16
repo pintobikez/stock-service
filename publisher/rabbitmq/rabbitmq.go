@@ -63,7 +63,7 @@ func (p *Rabbitmq) Close() {
 func (p *Rabbitmq) Publish(s *gen.SkuResponse) error {
 
 	if p.channel == nil || p.conn == nil {
-		if err = p.Connect(); err != nil {
+		if err := p.Connect(); err != nil {
 			return err
 		}
 	}
@@ -85,5 +85,21 @@ func (p *Rabbitmq) Publish(s *gen.SkuResponse) error {
 		return err
 	}
 
+	return nil
+}
+
+// Health Endpoint of the Client
+func (p *Rabbitmq) Health() error {
+
+	if p.config == nil {
+		return fmt.Errorf("Publisher configuration not loaded")
+	}
+
+	pt := &Rabbitmq{config: p.config}
+	if err := pt.Connect(); err != nil {
+		return err
+	}
+
+	pt.Close()
 	return nil
 }

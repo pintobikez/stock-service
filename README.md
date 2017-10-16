@@ -3,7 +3,7 @@ Stock service is a small app to deal with stock and stock reservation
 The database used to store the data is a mysql one
 
 ## Requirements
-App requires Golang 1.8 or later, Glide Package Manager and Docker (for building)
+App requires Golang 1.9 or later, Glide Package Manager and Docker (for building)
 
 ## Installation
 - Install [Golang](https://golang.org/doc/install)

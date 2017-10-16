@@ -3,7 +3,7 @@ package repository
 import gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
 
 type IRepository interface {
-	ConnectDB(stringConn string) error
+	ConnectDB() error
 	DisconnectDB()
 	RepoFindBySkuAndWharehouse(sku string, warehouse string) (*gen.Sku, error)
 	RepoFindSku(sku string) (*gen.SkuResponse, error)
@@ -11,4 +11,5 @@ type IRepository interface {
 	RepoInsertSku(s *gen.Sku) error
 	RepoInsertReservation(re *gen.Reservation) error
 	RepoDeleteReservation(re *gen.Reservation) error
+	Health() error
 }

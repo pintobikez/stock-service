@@ -3,6 +3,7 @@ package api
 import (
 	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
 	mock "bitbucket.org/ricardomvpinto/stock-service/mocks"
+	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo"
 	"github.com/stretchr/testify/assert"
@@ -39,7 +40,7 @@ var testReservationProviderApi = []reservationProviderApi{
 	{"DELETE", "/reservation/SCC", `{"warehouse":"A"}`, http.StatusOK},                  // Insert OK
 }
 
-func TestPutDeleteReservationApi(t *testing.T) {
+func TestPutDeleteReservation(t *testing.T) {
 	for _, pair := range testReservationProviderApi {
 		p := new(mock.PublisherMock)
 		r := new(mock.RepositoryMock)
@@ -77,7 +78,7 @@ var testGetStockProviderApi = []getStockProviderApi{
 	{"/stock/SC", http.StatusOK},        // sku found
 }
 
-func TestGetStockApi(t *testing.T) {
+func TestGetStock(t *testing.T) {
 	for _, pair := range testGetStockProviderApi {
 		p := new(mock.PublisherMock)
 		r := new(mock.RepositoryMock)
@@ -115,7 +116,7 @@ var testPutStockProviderApi = []putStockProviderApi{
 	{"/stock/SCD", `{"quantity":10, "warehouse":"D"}`, http.StatusInternalServerError}, // Error in publish
 }
 
-func TestPutStockApi(t *testing.T) {
+func TestPutStock(t *testing.T) {
 	for _, pair := range testPutStockProviderApi {
 		p := new(mock.PublisherMock)
 		r := new(mock.RepositoryMock)
@@ -147,7 +148,7 @@ var testValidSkuApi = []testSkuApi{
 }
 
 /* Test for ValidateSku method */
-func TestValidateSkuApi(t *testing.T) {
+func TestValidateSku(t *testing.T) {
 	p := new(mock.PublisherMock)
 	r := new(mock.RepositoryMock)
 	a := New(r, p)
@@ -171,7 +172,7 @@ var testValidReservationApi = []testReservApi{
 }
 
 /* Test for ValidateSku method */
-func TestValidateReservationApi(t *testing.T) {
+func TestValidateReservation(t *testing.T) {
 	p := new(mock.PublisherMock)
 	r := new(mock.RepositoryMock)
 	a := New(r, p)
@@ -179,5 +180,60 @@ func TestValidateReservationApi(t *testing.T) {
 	for _, pair := range testValidReservationApi {
 		v := a.validateReservation(&pair.value)
 		assert.Equal(t, v, pair.result, "Error message doesn't match")
+	}
+}
+
+/*
+Tests for HealthStatus method
+*/
+type getHealthStatusApi struct {
+	value string
+	erro  string
+}
+
+var testGetHealthStatusApi = []getHealthStatusApi{
+	{"/health/", "repo"}, // error in repo
+	{"/health/", "pub"},  // error in publisher
+	{"/health/", ""},     // all good
+}
+
+func TestHealthStatus(t *testing.T) {
+	for _, pair := range testGetHealthStatusApi {
+		p := new(mock.PublisherMock)
+		r := new(mock.RepositoryMock)
+		a := New(r, p)
+
+		switch pair.erro {
+		case "repo":
+			r.Iserror = true
+			break
+		case "pub":
+			p.Iserror = true
+			break
+		}
+
+		// Setup
+		e := echo.New()
+		e.GET("/health/", a.HealthStatus())
+
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", pair.value, strings.NewReader(""))
+		req.Header.Set("Content-Type", "application/json")
+		e.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		val := new(gen.HealthStatus)
+		_ = json.Unmarshal([]byte(rec.Body.String()), val)
+
+		// Assertions
+		switch pair.erro {
+		case "repo":
+			assert.Equal(t, StatusUnavailable, val.Repo.Status)
+			break
+		case "pub":
+			assert.Equal(t, StatusUnavailable, val.Pub.Status)
+			break
+		}
 	}
 }

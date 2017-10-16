@@ -30,6 +30,15 @@ SSL_KEY={{ stock_service_ssl_key | default("") }}
 DATABASE_FILE={{ stock_service_storage_file | default("/etc/stock-service/core.database.yml") }}
 
 # -----------------------------------------------------------------------------
+# Publisher configuration
+# -----------------------------------------------------------------------------
+
+# Configuration used to connect to the publisher server
+
+# Storage file
+PUBLISHER_FILE={{ stock_service_publisher_file | default("/etc/stock-service/core.publisher.yml") }}
+
+# -----------------------------------------------------------------------------
 # Revision file
 # -----------------------------------------------------------------------------
 

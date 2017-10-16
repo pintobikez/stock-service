@@ -22,3 +22,13 @@ type Reservation struct {
 	Sku       string `json:"sku"`
 	Warehouse string `json:"warehouse"`
 }
+
+type HealthStatus struct {
+	Pub  *HealthStatusDetail `json:"publisher"`
+	Repo *HealthStatusDetail `json:"repository"`
+}
+
+type HealthStatusDetail struct {
+	Status string `json:"status"`
+	Detail string `json:"detail,omitempty"`
+}

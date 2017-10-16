@@ -2,20 +2,39 @@ package mysql
 
 import (
 	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
+	cnfs "bitbucket.org/ricardomvpinto/stock-service/config/structures"
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"strconv"
+)
+
+const (
+	IsEmpty = "% is empty"
 )
 
 type Repository struct {
-	//props
-	db *sql.DB
+	config *cnfs.DatabaseConfig
+	db     *sql.DB
+}
+
+func New(cnfg *cnfs.DatabaseConfig) (*Repository, error) {
+	if cnfg == nil {
+		return nil, fmt.Errorf("Repository configuration not loaded")
+	}
+
+	return &Repository{config: cnfg}, nil
 }
 
 // Connects to the mysql database
-func (r *Repository) ConnectDB(stringConn string) error {
-	var err error
-	r.db, err = sql.Open("mysql", stringConn)
+func (r *Repository) ConnectDB() error {
+
+	urlString, err := r.buildStringConnection()
+	if err != nil {
+		return err
+	}
+
+	r.db, err = sql.Open("mysql", urlString)
 	if err != nil {
 		return err
 	}
@@ -190,4 +209,49 @@ func (r *Repository) RepoDeleteReservation(re *gen.Reservation) error {
 	defer stmt.Close()
 
 	return nil
+}
+
+// Health Endpoint of the Client
+func (r *Repository) Health() error {
+
+	str, err := r.buildStringConnection()
+	if err != nil {
+		return err
+	}
+
+	db, err := sql.Open("mysql", str)
+	if err != nil {
+		return err
+	}
+
+	db.Close()
+	return nil
+}
+
+func (r *Repository) buildStringConnection() (string, error) {
+	// [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
+	if r.config == nil {
+		return "", fmt.Errorf("Repository configuration not loaded")
+	}
+	if r.config.Driver.User == "" {
+		return "", fmt.Errorf(IsEmpty, "User")
+	}
+	if r.config.Driver.Pw == "" {
+		return "", fmt.Errorf(IsEmpty, "Password")
+	}
+	if r.config.Driver.Host == "" {
+		return "", fmt.Errorf(IsEmpty, "Host")
+	}
+	if r.config.Driver.Port <= 0 {
+		return "", fmt.Errorf(IsEmpty, "Port")
+	}
+	if r.config.Driver.Schema == "" {
+		return "", fmt.Errorf(IsEmpty, "Schema")
+	}
+
+	stringConn := r.config.Driver.User + ":" + r.config.Driver.Pw
+	stringConn += "@tcp(" + r.config.Driver.Host + ":" + strconv.Itoa(r.config.Driver.Port) + ")"
+	stringConn += "/" + r.config.Driver.Schema + "?charset=utf8"
+
+	return stringConn, nil
 }
