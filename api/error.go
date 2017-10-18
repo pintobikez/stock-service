@@ -5,9 +5,15 @@ import (
 	"net/http"
 )
 
-var (
+const (
 	SkuNotFound            = "Sku %s not found"
 	ReservationDeleteError = "No reservation found for Sku %s and Warehouse %s"
+
+	ErrorCodeSkuNotFound       = 1001
+	ErrorCodeWrongJsonFormat   = 1002
+	ErrorCodeInvalidContent    = 1003
+	ErrorCodeStoringContent    = 1004
+	ErrorCodePublishingMessage = 1005
 )
 
 type (

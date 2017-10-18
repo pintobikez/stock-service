@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
 	cnfs "bitbucket.org/ricardomvpinto/stock-service/config/structures"
 	"github.com/streadway/amqp"
 )
@@ -15,6 +14,7 @@ type Rabbitmq struct {
 	channel *amqp.Channel
 }
 
+// Creates a pointer to a new Rabbitmq struct
 func New(cnfg *cnfs.PublisherConfig) (*Rabbitmq, error) {
 	p := &Rabbitmq{config: cnfg}
 	err := p.Connect()
@@ -22,6 +22,7 @@ func New(cnfg *cnfs.PublisherConfig) (*Rabbitmq, error) {
 	return p, err
 }
 
+// Connects to the RabbitServer and to the defined ExchangeQueue
 func (p *Rabbitmq) Connect() error {
 
 	var err error
@@ -51,6 +52,7 @@ func (p *Rabbitmq) Connect() error {
 	return err
 }
 
+// Closes both Rabbit and Exchange connection
 func (p *Rabbitmq) Close() {
 	if p.channel != nil {
 		p.channel.Close()
@@ -60,7 +62,8 @@ func (p *Rabbitmq) Close() {
 	}
 }
 
-func (p *Rabbitmq) Publish(s *gen.SkuResponse) error {
+// Publishes a message to the Defined ExchangeQueue
+func (p *Rabbitmq) Publish(s interface{}) error {
 
 	if p.channel == nil || p.conn == nil {
 		if err := p.Connect(); err != nil {

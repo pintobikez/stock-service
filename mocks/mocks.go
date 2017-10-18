@@ -77,8 +77,14 @@ func (c *RepositoryMock) Health() error {
 // MOCK Repository - END
 
 // MOCK Publisher - START
-func (c *PublisherMock) Publish(s *gen.SkuResponse) error {
-	if s.Sku == "SCD" {
+func (c *PublisherMock) Connect() error {
+	return nil
+}
+func (c *PublisherMock) Close() {
+	return
+}
+func (c *PublisherMock) Publish(s interface{}) error {
+	if s.(*gen.SkuResponse).Sku == "SCD" {
 		return fmt.Errorf("Erro")
 	}
 	return nil
