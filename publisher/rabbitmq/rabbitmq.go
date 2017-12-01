@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	cnfs "bitbucket.org/ricardomvpinto/stock-service/config/structures"
+	gen "github.com/pintobikez/stock-service/api/structures"
+	cnfs "github.com/pintobikez/stock-service/config/structures"
 	"github.com/streadway/amqp"
 )
 
@@ -63,7 +64,7 @@ func (p *Rabbitmq) Close() {
 }
 
 // Publishes a message to the Defined ExchangeQueue
-func (p *Rabbitmq) Publish(s interface{}) error {
+func (p *Rabbitmq) Publish(s *gen.SkuResponse) error {
 
 	if p.channel == nil || p.conn == nil {
 		if err := p.Connect(); err != nil {

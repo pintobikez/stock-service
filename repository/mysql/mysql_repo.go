@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
-	cnfs "bitbucket.org/ricardomvpinto/stock-service/config/structures"
+	gen "github.com/pintobikez/stock-service/api/structures"
+	cnfs "github.com/pintobikez/stock-service/config/structures"
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
@@ -13,21 +13,21 @@ const (
 	IsEmpty = "% is empty"
 )
 
-type Repository struct {
+type Client struct {
 	config *cnfs.DatabaseConfig
 	db     *sql.DB
 }
 
-func New(cnfg *cnfs.DatabaseConfig) (*Repository, error) {
+func New(cnfg *cnfs.DatabaseConfig) (*MysqlClient, error) {
 	if cnfg == nil {
-		return nil, fmt.Errorf("Repository configuration not loaded")
+		return nil, fmt.Errorf("MysqlClient configuration not loaded")
 	}
 
-	return &Repository{config: cnfg}, nil
+	return &MysqlClient{config: cnfg}, nil
 }
 
 // Connects to the mysql database
-func (r *Repository) ConnectDB() error {
+func (r *MysqlClient) Connect() error {
 
 	urlString, err := r.buildStringConnection()
 	if err != nil {
@@ -42,12 +42,12 @@ func (r *Repository) ConnectDB() error {
 }
 
 // Disconnects from the mysql database
-func (r *Repository) DisconnectDB() {
+func (r *MysqlClient) Disconnect() {
 	r.db.Close()
 }
 
 // Find by the sku value and a warehouse and Retrives an Sku
-func (r *Repository) RepoFindBySkuAndWharehouse(sku string, warehouse string) (*gen.Sku, error) {
+func (r *MysqlClient) FindBySkuAndWharehouse(sku string, warehouse string) (*gen.Sku, error) {
 	var quantity int64
 	var found bool
 
@@ -69,7 +69,7 @@ func (r *Repository) RepoFindBySkuAndWharehouse(sku string, warehouse string) (*
 }
 
 // Finds by the sku value and Retrives an SkuResponse
-func (r *Repository) RepoFindSku(sku string) (*gen.SkuResponse, error) {
+func (r *MysqlClient) FindSku(sku string) (*gen.SkuResponse, error) {
 
 	var resp *gen.SkuResponse = new(gen.SkuResponse)
 
@@ -112,7 +112,7 @@ func (r *Repository) RepoFindSku(sku string) (*gen.SkuResponse, error) {
 }
 
 // Updates the given Sku
-func (r *Repository) RepoUpdateSku(s *gen.Sku) (int64, error) {
+func (r *MysqlClient) UpdateSku(s *gen.Sku) (int64, error) {
 
 	stmt, err := r.db.Prepare("UPDATE stock SET quantity=? WHERE sku=? AND warehouse=?")
 
@@ -141,7 +141,7 @@ func (r *Repository) RepoUpdateSku(s *gen.Sku) (int64, error) {
 }
 
 // Inserts the given Sku
-func (r *Repository) RepoInsertSku(s *gen.Sku) error {
+func (r *MysqlClient) InsertSku(s *gen.Sku) error {
 
 	stmt, err := r.db.Prepare("INSERT INTO stock VALUES (?,?,?,now())")
 
@@ -162,7 +162,7 @@ func (r *Repository) RepoInsertSku(s *gen.Sku) error {
 }
 
 // Inserts an Sku Reservation
-func (r *Repository) RepoInsertReservation(re *gen.Reservation) error {
+func (r *MysqlClient) InsertReservation(re *gen.Reservation) error {
 
 	stmt, err := r.db.Prepare("INSERT INTO reservation VALUES (?,?,now())")
 
@@ -183,7 +183,7 @@ func (r *Repository) RepoInsertReservation(re *gen.Reservation) error {
 }
 
 // Deletes an Sku Reservation
-func (r *Repository) RepoDeleteReservation(re *gen.Reservation) error {
+func (r *MysqlClient) DeleteReservation(re *gen.Reservation) error {
 
 	stmt, err := r.db.Prepare("DELETE FROM reservation WHERE sku=? AND warehouse=? ORDER BY created_at ASC LIMIT 1")
 
@@ -212,7 +212,7 @@ func (r *Repository) RepoDeleteReservation(re *gen.Reservation) error {
 }
 
 // Health Endpoint of the Client
-func (r *Repository) Health() error {
+func (r *MysqlClient) Health() error {
 
 	str, err := r.buildStringConnection()
 	if err != nil {
@@ -228,10 +228,10 @@ func (r *Repository) Health() error {
 	return nil
 }
 
-func (r *Repository) buildStringConnection() (string, error) {
+func (r *MysqlClient) buildStringConnection() (string, error) {
 	// [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
 	if r.config == nil {
-		return "", fmt.Errorf("Repository configuration not loaded")
+		return "", fmt.Errorf("MysqlClient configuration not loaded")
 	}
 	if r.config.Driver.User == "" {
 		return "", fmt.Errorf(IsEmpty, "User")

@@ -1,15 +1,15 @@
 package main
 
 import (
-	api "bitbucket.org/ricardomvpinto/stock-service/api"
-	uti "bitbucket.org/ricardomvpinto/stock-service/config"
-	cnfs "bitbucket.org/ricardomvpinto/stock-service/config/structures"
-	lg "bitbucket.org/ricardomvpinto/stock-service/log"
-	pub "bitbucket.org/ricardomvpinto/stock-service/publisher"
-	pb "bitbucket.org/ricardomvpinto/stock-service/publisher/rabbitmq"
-	rep "bitbucket.org/ricardomvpinto/stock-service/repository"
-	mysql "bitbucket.org/ricardomvpinto/stock-service/repository/mysql"
-	srv "bitbucket.org/ricardomvpinto/stock-service/server"
+	api "github.com/pintobikez/stock-service/api"
+	uti "github.com/pintobikez/stock-service/config"
+	cnfs "github.com/pintobikez/stock-service/config/structures"
+	lg "github.com/pintobikez/stock-service/log"
+	pub "github.com/pintobikez/stock-service/publisher"
+	pb "github.com/pintobikez/stock-service/publisher/rabbitmq"
+	rep "github.com/pintobikez/stock-service/repository"
+	mysql "github.com/pintobikez/stock-service/repository/mysql"
+	srv "github.com/pintobikez/stock-service/server"
 	"context"
 	middleware "github.com/dafiti/echo-middleware"
 	inst "github.com/dafiti/go-instrument"
@@ -25,8 +25,8 @@ import (
 
 var (
 	instrument inst.Instrument
-	repo       rep.IRepository
-	pubsub     pub.IPubSub
+	repo       rep.Repository
+	pubsub     pub.PubSub
 	apiStruct  *api.API
 )
 
@@ -73,10 +73,11 @@ func Handler(c *cli.Context) error {
 	}
 
 	// Database connect
-	err = repo.ConnectDB()
+	err = repo.Connect()
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
+	defer repo.Disconnect()
 
 	//loads rabbitmq config
 	rbcnfg := new(cnfs.PublisherConfig)
@@ -89,6 +90,7 @@ func Handler(c *cli.Context) error {
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
+	defer pubsub.Close()
 
 	apiStruct = api.New(repo, pubsub)
 
@@ -160,7 +162,6 @@ func Handler(c *cli.Context) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	defer repo.DisconnectDB()
 
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)

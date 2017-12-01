@@ -1,9 +1,9 @@
 package api
 
 import (
-	strut "bitbucket.org/ricardomvpinto/stock-service/api/structures"
-	pub "bitbucket.org/ricardomvpinto/stock-service/publisher"
-	repo "bitbucket.org/ricardomvpinto/stock-service/repository"
+	strut "github.com/pintobikez/stock-service/api/structures"
+	pub "github.com/pintobikez/stock-service/publisher"
+	repo "github.com/pintobikez/stock-service/repository"
 	"fmt"
 	"github.com/labstack/echo"
 	"net/http"
@@ -15,11 +15,11 @@ const (
 )
 
 type API struct {
-	rp repo.IRepository
-	pb pub.IPubSub
+	rp repo.Repository
+	pb pub.PubSub
 }
 
-func New(rpo repo.IRepository, p pub.IPubSub) *API {
+func New(rpo repo.Repository, p pub.PubSub) *API {
 	return &API{rp: rpo, pb: p}
 }
 
@@ -50,7 +50,7 @@ func (a *API) GetStock() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		skuValue := c.Param("sku")
-		skuResponse, err := a.rp.RepoFindSku(skuValue)
+		skuResponse, err := a.rp.FindSku(skuValue)
 
 		if err != nil {
 			return c.JSON(http.StatusNotFound, &ErrResponse{ErrContent{ErrorCodeSkuNotFound, err.Error()}})
@@ -77,24 +77,24 @@ func (a *API) PutStock() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{ErrorCodeInvalidContent, err.Error()}})
 		}
 
-		f, err := a.rp.RepoFindBySkuAndWharehouse(s.Sku, s.Warehouse)
+		f, err := a.rp.FindBySkuAndWharehouse(s.Sku, s.Warehouse)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{ErrorCodeSkuNotFound, err.Error()}})
 		}
 
 		if f.Sku != "" {
-			af, err = a.rp.RepoUpdateSku(s)
+			af, err = a.rp.UpdateSku(s)
 			if err != nil {
 				return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{ErrorCodeStoringContent, err.Error()}})
 			}
 		} else {
-			if err := a.rp.RepoInsertSku(s); err != nil {
+			if err := a.rp.InsertSku(s); err != nil {
 				return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{ErrorCodeStoringContent, err.Error()}})
 			}
 		}
 
 		if af > 0 { //publish message
-			skuResponse, err := a.rp.RepoFindSku(s.Sku)
+			skuResponse, err := a.rp.FindSku(s.Sku)
 			if err != nil {
 				return c.JSON(http.StatusNotFound, &ErrResponse{ErrContent{ErrorCodeSkuNotFound, fmt.Sprintf(SkuNotFound, s.Sku)}})
 			}
@@ -152,18 +152,18 @@ func (a *API) processReservation(r *strut.Reservation, put bool) (int, int, erro
 		return http.StatusBadRequest, ErrorCodeInvalidContent, err
 	}
 
-	skuFound, err := a.rp.RepoFindBySkuAndWharehouse(r.Sku, r.Warehouse)
+	skuFound, err := a.rp.FindBySkuAndWharehouse(r.Sku, r.Warehouse)
 	if err != nil {
 		return http.StatusInternalServerError, ErrorCodeSkuNotFound, err
 	}
 
 	if skuFound.Sku != "" {
 		if put {
-			if err := a.rp.RepoInsertReservation(r); err != nil {
+			if err := a.rp.InsertReservation(r); err != nil {
 				return http.StatusInternalServerError, ErrorCodeStoringContent, err
 			}
 		} else {
-			if err := a.rp.RepoDeleteReservation(r); err != nil {
+			if err := a.rp.DeleteReservation(r); err != nil {
 				if err.Error() == "404" {
 					return http.StatusNotFound, ErrorCodeSkuNotFound, fmt.Errorf(ReservationDeleteError, r.Sku, r.Warehouse)
 				}
@@ -174,7 +174,7 @@ func (a *API) processReservation(r *strut.Reservation, put bool) (int, int, erro
 		return http.StatusNotFound, ErrorCodeSkuNotFound, fmt.Errorf(SkuNotFound, "")
 	}
 
-	skuResponse, err := a.rp.RepoFindSku(r.Sku)
+	skuResponse, err := a.rp.FindSku(r.Sku)
 	if err != nil {
 		return http.StatusNotFound, ErrorCodeSkuNotFound, fmt.Errorf(SkuNotFound, r.Sku)
 	}

@@ -2,3 +2,4 @@ glide.lock
 .glide/
 build/
 vendor/
+handler

@@ -1,8 +1,8 @@
 package api
 
 import (
-	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
-	mock "bitbucket.org/ricardomvpinto/stock-service/mocks"
+	gen "github.com/pintobikez/stock-service/api/structures"
+	mock "github.com/pintobikez/stock-service/mocks"
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo"

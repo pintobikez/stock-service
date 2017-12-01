@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	gen "bitbucket.org/ricardomvpinto/stock-service/api/structures"
+	gen "github.com/pintobikez/stock-service/api/structures"
 	"fmt"
 )
 
@@ -16,13 +16,13 @@ type (
 )
 
 // MOCK Repository - START
-func (c *RepositoryMock) ConnectDB() error {
+func (c *RepositoryMock) Connect() error {
 	return nil
 }
-func (c *RepositoryMock) DisconnectDB() {
+func (c *RepositoryMock) Disconnect() {
 	return
 }
-func (c *RepositoryMock) RepoFindBySkuAndWharehouse(sku string, warehouse string) (*gen.Sku, error) {
+func (c *RepositoryMock) FindBySkuAndWharehouse(sku string, warehouse string) (*gen.Sku, error) {
 	if sku == "SAC" {
 		return new(gen.Sku), fmt.Errorf("Erro")
 	}
@@ -31,19 +31,19 @@ func (c *RepositoryMock) RepoFindBySkuAndWharehouse(sku string, warehouse string
 	}
 	return &gen.Sku{Sku: sku}, nil
 }
-func (c *RepositoryMock) RepoFindSku(sku string) (*gen.SkuResponse, error) {
+func (c *RepositoryMock) FindSku(sku string) (*gen.SkuResponse, error) {
 	if sku == "SCA" || sku == "SCCC" {
 		return new(gen.SkuResponse), fmt.Errorf("Erro")
 	}
 	return &gen.SkuResponse{Sku: sku}, nil
 }
-func (c *RepositoryMock) RepoUpdateSku(s *gen.Sku) (int64, error) {
+func (c *RepositoryMock) UpdateSku(s *gen.Sku) (int64, error) {
 	if s.Sku == "SC" {
 		return 0, fmt.Errorf("Erro")
 	}
 	return 1, nil
 }
-func (c *RepositoryMock) RepoInsertSku(s *gen.Sku) error {
+func (c *RepositoryMock) InsertSku(s *gen.Sku) error {
 	if s.Sku == "SC" {
 		return fmt.Errorf("Erro")
 	}
@@ -52,13 +52,13 @@ func (c *RepositoryMock) RepoInsertSku(s *gen.Sku) error {
 	}
 	return nil
 }
-func (c *RepositoryMock) RepoInsertReservation(re *gen.Reservation) error {
+func (c *RepositoryMock) InsertReservation(re *gen.Reservation) error {
 	if re.Sku == "SC" {
 		return fmt.Errorf("Erro")
 	}
 	return nil
 }
-func (c *RepositoryMock) RepoDeleteReservation(re *gen.Reservation) error {
+func (c *RepositoryMock) DeleteReservation(re *gen.Reservation) error {
 	if re.Sku == "SC" {
 		return fmt.Errorf("Erro")
 	}
@@ -83,8 +83,8 @@ func (c *PublisherMock) Connect() error {
 func (c *PublisherMock) Close() {
 	return
 }
-func (c *PublisherMock) Publish(s interface{}) error {
-	if s.(*gen.SkuResponse).Sku == "SCD" {
+func (c *PublisherMock) Publish(s *gen.SkuResponse) error {
+	if s.Sku == "SCD" {
 		return fmt.Errorf("Erro")
 	}
 	return nil

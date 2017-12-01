@@ -1,8 +1,10 @@
 package publisher
 
-type IPubSub interface {
+import gen "github.com/pintobikez/stock-service/api/structures"
+
+type PubSub interface {
 	Connect() error
 	Close()
-	Publish(s interface{}) error
+	Publish(s *gen.SkuResponse) error
 	Health() error
 }
