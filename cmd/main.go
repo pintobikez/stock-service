@@ -14,7 +14,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = appName
 	app.Version = version
-	app.Copyright = "(c) 2017 - Dafiti Group"
+	app.Copyright = "(c) 2017 - Ricardo Pinto"
 	app.Usage = "Stock service is a small app to deal with stock and stock reservation"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{

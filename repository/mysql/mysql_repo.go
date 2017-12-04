@@ -18,16 +18,16 @@ type Client struct {
 	db     *sql.DB
 }
 
-func New(cnfg *cnfs.DatabaseConfig) (*MysqlClient, error) {
+func New(cnfg *cnfs.DatabaseConfig) (*Client, error) {
 	if cnfg == nil {
-		return nil, fmt.Errorf("MysqlClient configuration not loaded")
+		return nil, fmt.Errorf("Client configuration not loaded")
 	}
 
-	return &MysqlClient{config: cnfg}, nil
+	return &Client{config: cnfg}, nil
 }
 
 // Connects to the mysql database
-func (r *MysqlClient) Connect() error {
+func (r *Client) Connect() error {
 
 	urlString, err := r.buildStringConnection()
 	if err != nil {
@@ -42,12 +42,12 @@ func (r *MysqlClient) Connect() error {
 }
 
 // Disconnects from the mysql database
-func (r *MysqlClient) Disconnect() {
+func (r *Client) Disconnect() {
 	r.db.Close()
 }
 
 // Find by the sku value and a warehouse and Retrives an Sku
-func (r *MysqlClient) FindBySkuAndWharehouse(sku string, warehouse string) (*gen.Sku, error) {
+func (r *Client) FindBySkuAndWharehouse(sku string, warehouse string) (*gen.Sku, error) {
 	var quantity int64
 	var found bool
 
@@ -69,7 +69,7 @@ func (r *MysqlClient) FindBySkuAndWharehouse(sku string, warehouse string) (*gen
 }
 
 // Finds by the sku value and Retrives an SkuResponse
-func (r *MysqlClient) FindSku(sku string) (*gen.SkuResponse, error) {
+func (r *Client) FindSku(sku string) (*gen.SkuResponse, error) {
 
 	var resp *gen.SkuResponse = new(gen.SkuResponse)
 
@@ -112,7 +112,7 @@ func (r *MysqlClient) FindSku(sku string) (*gen.SkuResponse, error) {
 }
 
 // Updates the given Sku
-func (r *MysqlClient) UpdateSku(s *gen.Sku) (int64, error) {
+func (r *Client) UpdateSku(s *gen.Sku) (int64, error) {
 
 	stmt, err := r.db.Prepare("UPDATE stock SET quantity=? WHERE sku=? AND warehouse=?")
 
@@ -141,7 +141,7 @@ func (r *MysqlClient) UpdateSku(s *gen.Sku) (int64, error) {
 }
 
 // Inserts the given Sku
-func (r *MysqlClient) InsertSku(s *gen.Sku) error {
+func (r *Client) InsertSku(s *gen.Sku) error {
 
 	stmt, err := r.db.Prepare("INSERT INTO stock VALUES (?,?,?,now())")
 
@@ -162,7 +162,7 @@ func (r *MysqlClient) InsertSku(s *gen.Sku) error {
 }
 
 // Inserts an Sku Reservation
-func (r *MysqlClient) InsertReservation(re *gen.Reservation) error {
+func (r *Client) InsertReservation(re *gen.Reservation) error {
 
 	stmt, err := r.db.Prepare("INSERT INTO reservation VALUES (?,?,now())")
 
@@ -183,7 +183,7 @@ func (r *MysqlClient) InsertReservation(re *gen.Reservation) error {
 }
 
 // Deletes an Sku Reservation
-func (r *MysqlClient) DeleteReservation(re *gen.Reservation) error {
+func (r *Client) DeleteReservation(re *gen.Reservation) error {
 
 	stmt, err := r.db.Prepare("DELETE FROM reservation WHERE sku=? AND warehouse=? ORDER BY created_at ASC LIMIT 1")
 
@@ -212,7 +212,7 @@ func (r *MysqlClient) DeleteReservation(re *gen.Reservation) error {
 }
 
 // Health Endpoint of the Client
-func (r *MysqlClient) Health() error {
+func (r *Client) Health() error {
 
 	str, err := r.buildStringConnection()
 	if err != nil {
@@ -228,10 +228,10 @@ func (r *MysqlClient) Health() error {
 	return nil
 }
 
-func (r *MysqlClient) buildStringConnection() (string, error) {
+func (r *Client) buildStringConnection() (string, error) {
 	// [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
 	if r.config == nil {
-		return "", fmt.Errorf("MysqlClient configuration not loaded")
+		return "", fmt.Errorf("Client configuration not loaded")
 	}
 	if r.config.Driver.User == "" {
 		return "", fmt.Errorf(IsEmpty, "User")
