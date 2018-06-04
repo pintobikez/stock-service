@@ -1,11 +1,11 @@
 package mysql
 
 import (
-	gen "github.com/pintobikez/stock-service/api/structures"
-	cnfs "github.com/pintobikez/stock-service/config/structures"
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	gen "github.com/pintobikez/stock-service/api/structures"
+	cnfs "github.com/pintobikez/stock-service/config/structures"
 	"strconv"
 )
 
@@ -251,7 +251,7 @@ func (r *Client) buildStringConnection() (string, error) {
 
 	stringConn := r.config.Driver.User + ":" + r.config.Driver.Pw
 	stringConn += "@tcp(" + r.config.Driver.Host + ":" + strconv.Itoa(r.config.Driver.Port) + ")"
-	stringConn += "/" + r.config.Driver.Schema + "?charset=utf8"
+	stringConn += "/" + r.config.Driver.Schema + "?charset=utf8&parseTime=True"
 
 	return stringConn, nil
 }
