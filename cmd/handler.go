@@ -1,6 +1,12 @@
 package main
 
 import (
+	"context"
+	middleware "github.com/dafiti/echo-middleware"
+	"github.com/labstack/echo"
+	mw "github.com/labstack/echo/middleware"
+	"github.com/labstack/gommon/color"
+	"github.com/labstack/gommon/log"
 	api "github.com/pintobikez/stock-service/api"
 	uti "github.com/pintobikez/stock-service/config"
 	cnfs "github.com/pintobikez/stock-service/config/structures"
@@ -10,13 +16,6 @@ import (
 	rep "github.com/pintobikez/stock-service/repository"
 	mysql "github.com/pintobikez/stock-service/repository/mysql"
 	srv "github.com/pintobikez/stock-service/server"
-	"context"
-	middleware "github.com/dafiti/echo-middleware"
-	inst "github.com/dafiti/go-instrument"
-	"github.com/labstack/echo"
-	mw "github.com/labstack/echo/middleware"
-	"github.com/labstack/gommon/color"
-	"github.com/labstack/gommon/log"
 	"gopkg.in/urfave/cli.v1"
 	"os"
 	"os/signal"
@@ -24,22 +23,17 @@ import (
 )
 
 var (
-	instrument inst.Instrument
-	repo       rep.Repository
-	pubsub     pub.PubSub
-	apiStruct  *api.API
+	repo      rep.Repository
+	pubsub    pub.PubSub
+	apiStruct *api.API
 )
-
-func init() {
-	instrument = new(inst.Dummy)
-}
 
 // Start Http Server
 func Handler(c *cli.Context) error {
 
 	// Echo instance
 	e := &srv.Server{echo.New()}
-	e.HTTPErrorHandler = api.Error
+	e.HTTPErrorHandler = ServerErrorHandler
 	e.Logger.SetLevel(log.INFO)
 	e.Logger.SetOutput(lg.File(c.String("log-folder") + "/app.log"))
 
@@ -51,8 +45,6 @@ func Handler(c *cli.Context) error {
 			c.String("newrelic-appname"),
 			c.String("newrelic-license-key"),
 		))
-
-		instrument = new(inst.NewRelic)
 	}
 
 	e.Use(mw.Recover())
@@ -86,6 +78,7 @@ func Handler(c *cli.Context) error {
 		e.Logger.Fatal(err)
 	}
 
+	// RabbitMQ connect
 	pubsub, err = pb.New(rbcnfg)
 	if err != nil {
 		e.Logger.Fatal(err)

@@ -1,8 +1,8 @@
 package mocks
 
 import (
-	gen "github.com/pintobikez/stock-service/api/structures"
 	"fmt"
+	gen "github.com/pintobikez/stock-service/api/structures"
 )
 
 // MOCK STRUCTURES DEFINITION

@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	IsEmpty = "% is empty"
+	IsEmpty = "%s is empty"
 )
 
 type Client struct {

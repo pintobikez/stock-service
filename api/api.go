@@ -1,17 +1,26 @@
 package api
 
 import (
+	"fmt"
+	"github.com/labstack/echo"
 	strut "github.com/pintobikez/stock-service/api/structures"
 	pub "github.com/pintobikez/stock-service/publisher"
 	repo "github.com/pintobikez/stock-service/repository"
-	"fmt"
-	"github.com/labstack/echo"
 	"net/http"
 )
 
 const (
 	StatusAvailable   = "Available"
 	StatusUnavailable = "Unavailable"
+
+	SkuNotFound            = "Sku %s not found"
+	ReservationDeleteError = "No reservation found for Sku %s and Warehouse %s"
+
+	ErrorCodeSkuNotFound       = 1001
+	ErrorCodeWrongJsonFormat   = 1002
+	ErrorCodeInvalidContent    = 1003
+	ErrorCodeStoringContent    = 1004
+	ErrorCodePublishingMessage = 1005
 )
 
 type API struct {
