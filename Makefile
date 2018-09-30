@@ -7,8 +7,7 @@ APP_VERSION=0.0.1
 LDFLAGS=--ldflags '-X main.version=${APP_VERSION} -X main.appName=${APP_NAME} -extldflags "-static" -w'
 OS=linux
 
-DOCKER_NS=gfgit
-DOCKER_IMAGE=gfgit/golang-ci:1.8.3
+DOCKER_IMAGE=golang:1.9-alpine
 
 .DEFAULT_GOAL := build
 
@@ -20,7 +19,7 @@ ifeq (${RUN},docker)
         ${DOCKER_IMAGE} sh -c "make OS=${OS} APP_NAME=${APP_NAME} APP_VERSION=${APP_VERSION}"
 else
 	@CGO_ENABLED=0 GOOS=${OS} go build -a ${LDFLAGS} -tags netgo -installsuffix netgo -v \
-    -o ./build/${APP_NAME} bitbucket.org/ricardomvpinto/stock-service/cmd
+    -o ./build/${APP_NAME} github.com/pintobikez/stock-service/cmd
 endif
 
 clean:
@@ -55,7 +54,7 @@ endif
 
 pack: depend
 	@command -v docker > /dev/null 2>&1 || ( echo "Please install Docker https://docs.docker.com/engine/installation/" && exit 1 )
-	@docker build -t ${DOCKER_NS}/${APP_NAME}:${APP_VERSION} --build-arg APP_NAME=${APP_NAME} -f ./Dockerfile .
+	@docker build -t ${APP_NAME}:${APP_VERSION} --build-arg APP_NAME=${APP_NAME} -f ./Dockerfile .
 
 test:
 ifeq (${RUN},docker)

@@ -1,5 +1,5 @@
-host: "172.31.0.1"
-user: root
-pw: root
+host: "localhost"
+user: "guest"
+pw: "guest"
 port: 5672
 exchange: stockservice_exchange

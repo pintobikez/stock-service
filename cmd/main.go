@@ -7,7 +7,7 @@ import (
 
 var (
 	appName string = "stock-service"
-	version string = "0.0.0"
+	version string = "0.0.1"
 )
 
 func main() {

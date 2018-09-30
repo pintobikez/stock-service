@@ -233,25 +233,25 @@ func (r *Client) buildStringConnection() (string, error) {
 	if r.config == nil {
 		return "", fmt.Errorf("Client configuration not loaded")
 	}
-	if r.config.Driver.User == "" {
+	if r.config.User == "" {
 		return "", fmt.Errorf(IsEmpty, "User")
 	}
-	if r.config.Driver.Pw == "" {
+	if r.config.Pw == "" {
 		return "", fmt.Errorf(IsEmpty, "Password")
 	}
-	if r.config.Driver.Host == "" {
+	if r.config.Host == "" {
 		return "", fmt.Errorf(IsEmpty, "Host")
 	}
-	if r.config.Driver.Port <= 0 {
+	if r.config.Port <= 0 {
 		return "", fmt.Errorf(IsEmpty, "Port")
 	}
-	if r.config.Driver.Schema == "" {
+	if r.config.Schema == "" {
 		return "", fmt.Errorf(IsEmpty, "Schema")
 	}
 
-	stringConn := r.config.Driver.User + ":" + r.config.Driver.Pw
-	stringConn += "@tcp(" + r.config.Driver.Host + ":" + strconv.Itoa(r.config.Driver.Port) + ")"
-	stringConn += "/" + r.config.Driver.Schema + "?charset=utf8&parseTime=True"
+	stringConn := r.config.User + ":" + r.config.Pw
+	stringConn += "@tcp(" + r.config.Host + ":" + strconv.Itoa(r.config.Port) + ")"
+	stringConn += "/" + r.config.Schema + "?charset=utf8&parseTime=True"
 
 	return stringConn, nil
 }

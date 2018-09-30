@@ -33,7 +33,7 @@ func Handler(c *cli.Context) error {
 
 	// Echo instance
 	e := &srv.Server{echo.New()}
-	e.HTTPErrorHandler = ServerErrorHandler
+	e.HTTPErrorHandler = api.ServerErrorHandler
 	e.Logger.SetLevel(log.INFO)
 	e.Logger.SetOutput(lg.File(c.String("log-folder") + "/app.log"))
 

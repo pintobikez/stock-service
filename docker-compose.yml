@@ -1,23 +1,36 @@
-version: '2'
+version: '2.1'
 services:
 
-    mysql:
-      image: mysql
-      ports:
-        - 3307:3306
-      environment:
-        MYSQL_ROOT_PASSWORD: root
-      volumes:
-        - ./dbutil:/docker-entrypoint-initdb.d
-      networks:
-            - default_network_name
+  rabbit:
+    image: "rabbitmq:3-management"
+    hostname: "rabbit1"
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+      RABBITMQ_DEFAULT_USER: "rabbitmq"
+      RABBITMQ_DEFAULT_PASS: "rabbitmq"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - default_network_name
+    labels:
+      NAME: "rabbitmq1"
+    volumes:
+      - ./rabbitmqdocker/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./rabbitmqdocker/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./rabbitmqdocker/rabbitmq.config:/etc/rabbitmq/rabbitmqnew.config:ro
 
-    stock:
-      image: stock-service-docker
-      ports:
-        - 8000:8000
-      networks:
-            - default_network_name
+  mysql:
+    image: mysql:5.7.22
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./dbutil:/docker-entrypoint-initdb.d
+    networks:
+      - default_network_name
 
 networks:
     default_network_name:

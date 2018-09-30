@@ -9,7 +9,7 @@ App requires Golang 1.9 or later, Glide Package Manager and Docker (for building
 - Install [Golang](https://golang.org/doc/install)
 - Install [Glide](https://glide.sh)
 - Install [Docker](htts://docker.com)
-
+- Install [Docker-compose](https://docs.docker.com/compose/)
 
 ## Build
 For building binaries please use make, look at the commands bellow:
@@ -69,8 +69,11 @@ $ make test-report
 
 ## Run it
 ```
-// Run and launch docker
-$ make build; docker build -t stock-service-docker .; docker-compose up;
+// Build and run docker-compose
+$ make build; sudo docker-compose up;
+
+// Run the service
+$ ./build/stock-service -l 0.0.0.0:8080 -d core.database.yml.example -p core.rabbitmq.yml.example
 ```
 
 ## Usage:
