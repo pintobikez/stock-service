@@ -8,7 +8,7 @@ App requires Golang 1.9 or later, Glide Package Manager and Docker (for building
 ## Installation
 - Install [Golang](https://golang.org/doc/install)
 - Install [Glide](https://glide.sh)
-- Install [Docker](htts://docker.com)
+- Install [Docker](https://www.docker.com/)
 - Install [Docker-compose](https://docs.docker.com/compose/)
 
 ## Build
@@ -42,9 +42,6 @@ $ make depend
 // Create a docker image with application
 $ make pack
 
-// Pack with custom Docker namespace. Default gfgit
-$ make DOCKER_NS=gfgit pack
-
 // Pack with custom version.
 $ make APP_VERSION=0.1.0 pack
 
@@ -52,7 +49,7 @@ $ make APP_VERSION=0.1.0 pack
 $ make APP_NAME=stock-service pack
 
 // Pack passing all flags
-$ make APP_NAME=stock-service APP_VERSION=0.1.0 DOCKER_NS=gfgit pack
+$ make APP_NAME=stock-service APP_VERSION=0.1.0
 ```
 
 ## Development
@@ -79,13 +76,19 @@ $ ./build/stock-service -l 0.0.0.0:8080 -d core.database.yml.example -p core.rab
 ## Usage:
 
 * PUT RESERVATION CALL
+```
 curl -v -X PUT http://localhost:8080/reservation/ABCDE -H 'content-type: application/json' -d '{"warehouse":"B"}'
-
+```
 * REMOVE RESERVATION CALL
+```
 curl -v -X DELETE http://localhost:8080/reservation/ABCDE -H 'content-type: application/json' -d '{"warehouse":"B"}'
-
+```
 * PUT STOCK CALL
+```
 curl -v -X PUT http://localhost:8080/stock/ABCDE -H 'content-type: application/json' -d '{"quantity":20,"warehouse":"B"}'
+```
 
 * GET STOCK CALL
+```
 curl -v -X GET http://localhost:8080/stock/ABCDE
+```
