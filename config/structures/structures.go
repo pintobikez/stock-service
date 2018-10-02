@@ -1,5 +1,10 @@
 package structures
 
+type AuthConfig struct {
+	Url     string            `yaml:"url,omitempty"`
+	Headers map[string]string `yaml:"headers,omitempty"`
+}
+
 type DatabaseConfig struct {
 	Host   string `yaml:"host,omitempty"`
 	User   string `yaml:"user,omitempty"`

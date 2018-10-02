@@ -60,6 +60,12 @@ func main() {
 			EnvVar: "PUBLISHER_FILE",
 		},
 		cli.StringFlag{
+			Name:   "auth-file, a",
+			Value:  "",
+			Usage:  "Authentication service to be called",
+			EnvVar: "AUTH_FILE",
+		},
+		cli.StringFlag{
 			Name:   "swagger-file, sw",
 			Value:  "",
 			Usage:  "Expose the swagger file",

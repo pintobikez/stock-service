@@ -1,0 +1,4 @@
+url: "http://localhost:8081/validate"
+headers:
+ "Requester":
+  "stock-service"

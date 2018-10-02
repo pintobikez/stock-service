@@ -1,6 +1,8 @@
 # Stock service
 Stock service is a small app to deal with stock and stock reservation
 The database used to store the data is a mysql one
+There is also the possiblity to call a Authorization Service in order to see if the requester can use the service.
+It will look for the Header field: Authorization
 
 ## Requirements
 App requires Golang 1.9 or later, Glide Package Manager and Docker (for building)
@@ -64,13 +66,29 @@ $ make test-coverage
 $ make test-report
 ```
 
+## Authorization Middleware
+This service can use an external service that verifies the validity of the Requester.
+You can setup in the an yaml file using the following format:
+	host: The url of the authorization service
+	headers: Its a key value map, that contains any header values that need to be passed to the Auth service
+ 		"KEY":
+ 			"VALUE"
+
+NOTE: This middleware expects to receive a Authorization Header containing the token to pass to the Authorization service
 ## Run it
+
+Build and run docker-compose
 ```
-// Build and run docker-compose
 $ make build; sudo docker-compose up;
 
-// Run the service
+Run the service without Authentication/Authorization middleware
+```
 $ ./build/stock-service -l 0.0.0.0:8080 -d core.database.yml.example -p core.rabbitmq.yml.example
+```
+
+Run the service with Authentication/Authorization middleware
+```
+$ ./build/stock-service -l 0.0.0.0:8080 -d core.database.yml.example -p core.rabbitmq.yml.example -a core.authservice.yml.example
 ```
 
 ## Usage:
