@@ -32,3 +32,12 @@ type HealthStatusDetail struct {
 	Status string `json:"status"`
 	Detail string `json:"detail,omitempty"`
 }
+
+type ErrResponse struct {
+	Error ErrContent `json:"error"`
+}
+
+type ErrContent struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}

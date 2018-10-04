@@ -1,11 +1,11 @@
 package api
 
 import (
-	gen "github.com/pintobikez/stock-service/api/structures"
-	mock "github.com/pintobikez/stock-service/mocks"
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo"
+	gen "github.com/pintobikez/stock-service/api/structures"
+	mock "github.com/pintobikez/stock-service/mocks"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -64,7 +64,7 @@ func TestPutDeleteReservation(t *testing.T) {
 		assert.Equal(t, rec.Code, pair.result, "Http Code doesn't match")
 
 		if pair.result != http.StatusOK {
-			erm := new(ErrResponse)
+			erm := new(gen.ErrResponse)
 			_ = json.Unmarshal([]byte(rec.Body.String()), erm)
 			assert.Equal(t, pair.code, erm.Error.Code, "ErrorCode doesn't match")
 		}
@@ -142,7 +142,7 @@ func TestPutStock(t *testing.T) {
 		assert.Equal(t, rec.Code, pair.result, "Http Code doesn't match")
 
 		if pair.result != http.StatusOK {
-			erm := new(ErrResponse)
+			erm := new(gen.ErrResponse)
 			_ = json.Unmarshal([]byte(rec.Body.String()), erm)
 			assert.Equal(t, pair.code, erm.Error.Code, "ErrorCode doesn't match")
 		}

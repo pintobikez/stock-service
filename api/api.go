@@ -62,7 +62,7 @@ func (a *API) GetStock() echo.HandlerFunc {
 		skuResponse, err := a.rp.FindSku(skuValue)
 
 		if err != nil {
-			return c.JSON(http.StatusNotFound, &ErrResponse{ErrContent{ErrorCodeSkuNotFound, err.Error()}})
+			return c.JSON(http.StatusNotFound, &strut.ErrResponse{strut.ErrContent{ErrorCodeSkuNotFound, err.Error()}})
 		}
 
 		return c.JSON(http.StatusOK, skuResponse)
@@ -77,39 +77,39 @@ func (a *API) PutStock() echo.HandlerFunc {
 		var s *strut.Sku
 
 		if err := c.Bind(&s); err != nil {
-			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{ErrorCodeWrongJsonFormat, err.Error()}})
+			return c.JSON(http.StatusBadRequest, &strut.ErrResponse{strut.ErrContent{ErrorCodeWrongJsonFormat, err.Error()}})
 		}
 
 		s.Sku = c.Param("sku")
 
 		if err := a.validateSku(s); err != nil {
-			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{ErrorCodeInvalidContent, err.Error()}})
+			return c.JSON(http.StatusBadRequest, &strut.ErrResponse{strut.ErrContent{ErrorCodeInvalidContent, err.Error()}})
 		}
 
 		f, err := a.rp.FindBySkuAndWharehouse(s.Sku, s.Warehouse)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{ErrorCodeSkuNotFound, err.Error()}})
+			return c.JSON(http.StatusInternalServerError, &strut.ErrResponse{strut.ErrContent{ErrorCodeSkuNotFound, err.Error()}})
 		}
 
 		if f.Sku != "" {
 			af, err = a.rp.UpdateSku(s)
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{ErrorCodeStoringContent, err.Error()}})
+				return c.JSON(http.StatusInternalServerError, &strut.ErrResponse{strut.ErrContent{ErrorCodeStoringContent, err.Error()}})
 			}
 		} else {
 			if err := a.rp.InsertSku(s); err != nil {
-				return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{ErrorCodeStoringContent, err.Error()}})
+				return c.JSON(http.StatusInternalServerError, &strut.ErrResponse{strut.ErrContent{ErrorCodeStoringContent, err.Error()}})
 			}
 		}
 
 		if af > 0 { //publish message
 			skuResponse, err := a.rp.FindSku(s.Sku)
 			if err != nil {
-				return c.JSON(http.StatusNotFound, &ErrResponse{ErrContent{ErrorCodeSkuNotFound, fmt.Sprintf(SkuNotFound, s.Sku)}})
+				return c.JSON(http.StatusNotFound, &strut.ErrResponse{strut.ErrContent{ErrorCodeSkuNotFound, fmt.Sprintf(SkuNotFound, s.Sku)}})
 			}
 
 			if err := a.pb.Publish(skuResponse); err != nil {
-				return c.JSON(http.StatusInternalServerError, &ErrResponse{ErrContent{ErrorCodePublishingMessage, err.Error()}})
+				return c.JSON(http.StatusInternalServerError, &strut.ErrResponse{strut.ErrContent{ErrorCodePublishingMessage, err.Error()}})
 			}
 		}
 
@@ -123,12 +123,12 @@ func (a *API) PutReservation() echo.HandlerFunc {
 		var res *strut.Reservation
 
 		if err := c.Bind(&res); err != nil {
-			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{ErrorCodeWrongJsonFormat, err.Error()}})
+			return c.JSON(http.StatusBadRequest, &strut.ErrResponse{strut.ErrContent{ErrorCodeWrongJsonFormat, err.Error()}})
 		}
 		res.Sku = c.Param("sku")
 
 		if httpcode, code, err := a.processReservation(res, true); err != nil {
-			return c.JSON(httpcode, &ErrResponse{ErrContent{code, err.Error()}})
+			return c.JSON(httpcode, &strut.ErrResponse{strut.ErrContent{code, err.Error()}})
 		}
 
 		return c.NoContent(http.StatusOK)
@@ -141,12 +141,12 @@ func (a *API) RemoveReservation() echo.HandlerFunc {
 		var res *strut.Reservation
 
 		if err := c.Bind(&res); err != nil {
-			return c.JSON(http.StatusBadRequest, &ErrResponse{ErrContent{ErrorCodeWrongJsonFormat, err.Error()}})
+			return c.JSON(http.StatusBadRequest, &strut.ErrResponse{strut.ErrContent{ErrorCodeWrongJsonFormat, err.Error()}})
 		}
 		res.Sku = c.Param("sku")
 
 		if httpcode, code, err := a.processReservation(res, false); err != nil {
-			return c.JSON(httpcode, &ErrResponse{ErrContent{code, err.Error()}})
+			return c.JSON(httpcode, &strut.ErrResponse{strut.ErrContent{code, err.Error()}})
 		}
 
 		return c.NoContent(http.StatusOK)
