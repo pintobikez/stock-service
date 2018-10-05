@@ -92,6 +92,17 @@ func (a *API) PutStock() echo.HandlerFunc {
 		}
 
 		if f.Sku != "" {
+
+			if c.Param("action") == "add" {
+				s.Quantity += f.Quantity
+			}
+			if c.Param("action") == "sub" {
+				s.Quantity = f.Quantity - s.Quantity
+			}
+			if s.Quantity < 0 {
+				return c.JSON(http.StatusBadRequest, &strut.ErrResponse{strut.ErrContent{ErrorCodeInvalidContent, fmt.Sprintf("Quantity is negative after subtraction")}})
+			}
+
 			af, err = a.rp.UpdateSku(s)
 			if err != nil {
 				return c.JSON(http.StatusInternalServerError, &strut.ErrResponse{strut.ErrContent{ErrorCodeStoringContent, err.Error()}})

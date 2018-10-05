@@ -54,17 +54,20 @@ func Handler(c *cli.Context) error {
 	e.Pre(mw.RemoveTrailingSlash())
 
 	//loads Authorization service
-	authConfig := new(cnfs.AuthConfig)
-	err := uti.LoadConfigFile(c.String("auth-file"), authConfig)
-	if err != nil {
-		e.Logger.Infof("Error in Authorization service %s", err.Error())
-	} else {
-		e.Use(mdw.Authorization(authConfig))
+	if c.String("auth-file") != "" {
+
+		authConfig := new(cnfs.AuthConfig)
+		err := uti.LoadConfigFile(c.String("auth-file"), authConfig)
+		if err != nil {
+			e.Logger.Infof("Error in Authorization service %s", err.Error())
+		} else {
+			e.Use(mdw.Authorization(authConfig))
+		}
 	}
 
 	//loads db connection
 	dbConfig := new(cnfs.DatabaseConfig)
-	err = uti.LoadConfigFile(c.String("database-file"), dbConfig)
+	err := uti.LoadConfigFile(c.String("database-file"), dbConfig)
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
@@ -105,7 +108,7 @@ func Handler(c *cli.Context) error {
 		},
 	))
 
-	e.PUT("/stock/:sku", apiStruct.PutStock(), mw.CORSWithConfig(
+	e.PUT("/stock/:sku/:action", apiStruct.PutStock(), mw.CORSWithConfig(
 		mw.CORSConfig{
 			AllowOrigins: []string{"*"},
 			AllowMethods: []string{echo.PUT, echo.OPTIONS, echo.HEAD},

@@ -105,7 +105,14 @@ curl -v -X DELETE http://localhost:8080/reservation/ABCDE -H 'content-type: appl
 ```
 curl -v -X PUT http://localhost:8080/stock/ABCDE -H 'content-type: application/json' -d '{"quantity":20,"warehouse":"B"}'
 ```
-
+* PUT STOCK CALL ADDING QUANTITY
+```
+curl -v -X PUT http://localhost:8080/stock/ABCDE/add -H 'content-type: application/json' -d '{"quantity":20,"warehouse":"B"}'
+```
+* PUT STOCK CALL SUBTRACTING QUANTITY
+```
+curl -v -X PUT http://localhost:8080/stock/ABCDE/sub -H 'content-type: application/json' -d '{"quantity":20,"warehouse":"B"}'
+```
 * GET STOCK CALL
 ```
 curl -v -X GET http://localhost:8080/stock/ABCDE
